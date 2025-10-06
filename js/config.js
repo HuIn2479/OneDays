@@ -1,7 +1,7 @@
 // 全局配置
 (function () {
   const config = {
-    version: "v0.10.1",
+    version: "v0.11.8",
     meta: {
       launchDate: "2021-02-27T00:00:00+08:00",
       title: "忆窝",
@@ -23,15 +23,26 @@
       ],
       defaultAccentIndex: 0,
       enableAccentPanel: true,
+      // 自动轮换强调色：根据 schedule 中的时间段切换 accents 索引
+      autoRotate: {
+        enable: true,
+        // 命名时段或分钟标记 -> 对应 accents 数组索引
+        schedule: {
+          dawn: 0,
+          noon: 1,
+          dusk: 3,
+          night: 4,
+        },
+      },
     },
     effects: {
       enableScrollProgress: false, // 启用滚动进度
     },
     runtime: {
-      enable: false, // 启用运行时间显示
+      enable: true, // 启用运行时间显示
     },
     hitokoto: {
-      enable: false, // 启用一言显示
+      enable: true, // 启用一言显示
       provider: "hitokoto", // API提供者：hitokoto | custom
       apis: {
         // 官方一言 API
@@ -51,17 +62,23 @@
       cacheTime: 300000, // 缓存时间(ms) - 5分钟
     },
     announcement: {
-      enable: false,
+      enable: true,
       icon: "😽",
       messages: [
         "平安喜樂，萬事勝意，祝你，祝我，祝我們",
-        "关注永雏塔菲喵！关注永雏塔菲谢谢喵！",
+        "关注卡拉彼丘喵！关注卡拉彼丘谢谢喵！",
         "ISTP-A | 机械键盘爱好者 | 猫奴",
       ],
       cycleInterval: 4800, // ms
       transition: 500, // ms
       dismissKey: "ann-v3",
       closeButton: true,
+      // 远程公告：按间隔拉取 JSON，若不需要可保持 enable 为 false
+      remoteFeed: {
+        enable: false,
+        source: "/data/announcements.json",
+        refreshInterval: 3600000,
+      },
     },
     performance: {
       adaptive: true, // 自适应关闭部分特效
@@ -85,7 +102,8 @@
           title: "Rin",
           description: "平安喜樂，萬事勝意，祝你，祝我，祝我們",
           url: "https://ns.onedays.top",
-          target: "_self"
+          target: "_self",
+          tags: ["blog", "life"]
         },
         {
           id: "GitHub",
@@ -93,9 +111,15 @@
           title: "GitHub",
           description: "什么也不会",
           url: "https://github.com/Huin2479",
-          target: "_self"
+          target: "_self",
+          tags: ["dev"]
         }
-      ]
+      ],
+      // 导航筛选：展示标签按钮并按 tags 过滤 cards
+      filters: {
+        enable: true,
+        tags: ["blog", "dev", "life"],
+      },
     },
     easter: {
       konami: true,            // Konami 代码触发彩蛋
@@ -123,6 +147,8 @@
     accents: config.theme.accents,
     defaultAccentIndex: config.theme.defaultAccentIndex,
     enableAccentPanel: config.theme.enableAccentPanel,
+    enableAccentAutoRotate: config.theme.autoRotate?.enable,
+    accentRotateSchedule: config.theme.autoRotate?.schedule,
     // effects
     enableScrollProgress: config.effects.enableScrollProgress,
     // runtime
@@ -142,6 +168,9 @@
     announcementTransition: config.announcement.transition,
     announcementDismissKey: config.announcement.dismissKey,
     enableAnnouncementClose: config.announcement.closeButton,
+    enableAnnouncementRemoteFeed: config.announcement.remoteFeed?.enable,
+    announcementRemoteSource: config.announcement.remoteFeed?.source,
+    announcementRemoteRefresh: config.announcement.remoteFeed?.refreshInterval,
     // performance
     adaptivePerformance: config.performance.adaptive,
     enableIdleAutoRelease: config.performance.idleAutoRelease,
@@ -156,6 +185,8 @@
     // navigation
     enableNavigation: config.navigation.enable,
     navigationCards: config.navigation.cards,
+    enableNavigationFilters: config.navigation.filters?.enable,
+    navigationFilterTags: config.navigation.filters?.tags,
     // version flat
     version: config.version,
     // easter

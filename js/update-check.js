@@ -1,182 +1,319 @@
 (function () {
-    const cfg = window.__APP_CONFIG__ || {};
-    const updateCfg = cfg.update || {};
-    // 兼容旧字段: enableUpdateCheck / update.enable
-    const ENABLE = (updateCfg.enable !== false) && (cfg.enableUpdateCheck !== false);
-    if (!ENABLE) return;
+    const config = window.__APP_CONFIG__ || {};
+    const updateConfig = config.update || {};
+    const ENABLED = (updateConfig.enable !== false) && (config.enableUpdateCheck !== false);
+    if (!ENABLED) return;
 
-    // 获取翻译函数
     const t = window.__I18N__?.t || (k => k);
 
-    // 基础配置 (多来源回退)
-    const VERSION = cfg.version || 'dev';
-    const SRC = updateCfg.source || cfg.updateSource || '/js/config.js';
-    const INTERVAL = updateCfg.checkInterval || cfg.updateCheckInterval || 300000; // 5min 默认轮询
-    const QUIET = updateCfg.quietWindow || cfg.updateQuietWindow || 300000;      // 静默刷新窗口
-    const NOTIFY_DELAY = updateCfg.notifyDelay || cfg.updateNotifyDelay || 0;
+    const DEFAULTS = Object.freeze({
+        version: 'dev',
+        source: '/js/config.js',
+        checkInterval: 300000,
+        quietWindow: 300000,
+        notifyDelay: 0,
+        maxRetries: 3,
+        retryBaseDelay: 400,
+    });
 
-    // localStorage key 常量
-    const KEY_VERSION = 'onedays-version';           // 存储本地已知版本或 pending-* 标记
-    const KEY_LAST_UPD = 'onedays-last-update';       // 最近一次真正刷新时间戳
-    const KEY_GAP_LIST = 'onedays-version-gap';       // 累计版本跨度记录
+    const SETTINGS = {
+        version: config.version || DEFAULTS.version,
+        source: updateConfig.source || config.updateSource || DEFAULTS.source,
+        checkInterval: updateConfig.checkInterval || config.updateCheckInterval || DEFAULTS.checkInterval,
+        quietWindow: updateConfig.quietWindow || config.updateQuietWindow || DEFAULTS.quietWindow,
+        notifyDelay: updateConfig.notifyDelay || config.updateNotifyDelay || DEFAULTS.notifyDelay,
+        maxRetries: Math.max(1, updateConfig.maxRetries || DEFAULTS.maxRetries),
+        retryBaseDelay: updateConfig.retryBaseDelay || DEFAULTS.retryBaseDelay,
+    };
 
-    // 状态变量
-    let stored = localStorage.getItem(KEY_VERSION);
-    if (!stored) { localStorage.setItem(KEY_VERSION, VERSION); stored = VERSION; }
-    let lastUpdateTs = parseInt(localStorage.getItem(KEY_LAST_UPD) || '0', 10) || 0;
-    let gapList = []; try { const raw = localStorage.getItem(KEY_GAP_LIST); if (raw) gapList = JSON.parse(raw) || []; } catch (_) { }
-    let timer = null; let inFlight = false; // 防重入
+    const STORAGE_KEYS = {
+        version: 'onedays-version',
+        lastUpdate: 'onedays-last-update',
+        gapList: 'onedays-version-gap',
+    };
 
-    function saveGap() { try { localStorage.setItem(KEY_GAP_LIST, JSON.stringify(gapList.slice(-6))); } catch (_) { } }
-
-    function addAnn(text, front) {
-        // 检查公告系统是否启用
-        const cfg = window.__APP_CONFIG__ || {};
-        if (cfg.enableAnnouncement === false) {
-            console.log('[Update] 公告系统已禁用，跳过消息:', text);
-            return;
-        }
-        
-        // 为更新消息添加特殊标识
-        const payload = typeof text === 'string' ? { text, isUpdate: true } : { ...text, isUpdate: true };
-        if (window.__announceAdd) {
-            // 更新消息总是使用最高优先级，确保显示在第一条
-            window.__announceAdd(payload, { priority: 'front', updateMessage: true });
-        } else {
-            window.__ANN_PENDING = window.__ANN_PENDING || [];
-            // 更新消息总是插入到队列最前面
-            window.__ANN_PENDING.unshift(payload);
-        }
-    }
-
-    function splashActive() {
-        const s = document.getElementById('splash');
-        return !!(s && !s.classList.contains('fade-out'));
-    }
-
-    // 解析版本 (支持多种格式)
-    function parseVersion(txt) {
-        // 尝试多种版本格式匹配
-        const patterns = [
-            // version: "1.x" / version: '1.x'
-            /version\s*:\s*["']([^"']+)["']/,
-            // "version": "1.x"
-            /"version"\s*:\s*"([^"]+)"/,
-            // const VERSION = "1.x" / let VERSION = "1.x"
-            /(?:const|let|var)\s+VERSION\s*=\s*["']([^"']+)["']/,
-            // VERSION: "1.x"
-            /VERSION\s*:\s*["']([^"']+)["']/,
-            // v1.x.x 格式
-            /\bv?(\d+\.\d+(?:\.\d+)?(?:-[a-zA-Z0-9\-\.]+)?)\b/
-        ];
-
-        for (const pattern of patterns) {
-            const match = txt.match(pattern);
-            if (match && match[1]) {
-                return match[1];
+    const storage = {
+        get(key, fallback = null) {
+            try {
+                const value = window.localStorage.getItem(key);
+                return value === null ? fallback : value;
+            } catch (err) {
+                console.warn('[Update] localStorage.get failed:', err);
+                return fallback;
+            }
+        },
+        set(key, value) {
+            try {
+                window.localStorage.setItem(key, value);
+            } catch (err) {
+                console.warn('[Update] localStorage.set failed:', err);
+            }
+        },
+        remove(key) {
+            try {
+                window.localStorage.removeItem(key);
+            } catch (err) {
+                console.warn('[Update] localStorage.remove failed:', err);
             }
         }
-        return null;
+    };
+
+    function readGapList() {
+        const raw = storage.get(STORAGE_KEYS.gapList);
+        if (!raw) return [];
+        try {
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (err) {
+            console.warn('[Update] Failed to parse gap list:', err);
+            return [];
+        }
     }
 
-    async function fetchRemoteVersion(attempt = 0) {
-        const url = SRC + (SRC.includes('?') ? '&' : '?') + 'v=' + Date.now();
-        try {
-            const res = await fetch(url, { cache: 'no-store' });
-            if (!res.ok) return null;
-            const txt = await res.text();
-            return parseVersion(txt);
-        } catch (err) {
-            // 简单指数退避到 3 次
-            if (attempt < 2) {
-                return new Promise(r => setTimeout(() => r(fetchRemoteVersion(attempt + 1)), 400 * Math.pow(2, attempt)));
+    const announcer = {
+        push(text) {
+            if (config.enableAnnouncement === false) {
+                console.log('[Update] Announcement disabled, skip:', text);
+                return;
+            }
+            const payload = typeof text === 'string' ? { text, isUpdate: true } : { ...text, isUpdate: true };
+            if (typeof window.__announceAdd === 'function') {
+                window.__announceAdd(payload, { priority: 'front', updateMessage: true });
+            } else {
+                window.__ANN_PENDING = window.__ANN_PENDING || [];
+                window.__ANN_PENDING.unshift(payload);
+            }
+        }
+    };
+
+    const splashActive = () => {
+        const splash = document.getElementById('splash');
+        return !!(splash && !splash.classList.contains('fade-out'));
+    };
+
+    const versionParser = {
+        patterns: [
+            /version\s*:\s*"([^"]+)"/,
+            /version\s*:\s*'([^']+)'/,
+            /"version"\s*:\s*"([^"]+)"/,
+            /(?:const|let|var)\s+VERSION\s*=\s*"([^"]+)"/,
+            /(?:const|let|var)\s+VERSION\s*=\s*'([^']+)'/,
+            /VERSION\s*:\s*"([^"]+)"/,
+            /VERSION\s*:\s*'([^']+)'/,
+            /\bv?(\d+\.\d+(?:\.\d+)?(?:-[a-zA-Z0-9\-.]+)?)\b/,
+        ],
+        parse(text) {
+            for (const pattern of this.patterns) {
+                const match = text.match(pattern);
+                if (match && match[1]) return match[1];
             }
             return null;
         }
+    };
+
+    const cacheCleaner = {
+        async flushAll() {
+            try {
+                if (typeof window.releaseMemory === 'function') {
+                    window.releaseMemory(2);
+                }
+            } catch (err) {
+                console.warn('[Update] releaseMemory failed:', err);
+            }
+
+            if ('caches' in window) {
+                try {
+                    const keys = await window.caches.keys();
+                    await Promise.allSettled(keys.map(key => window.caches.delete(key)));
+                } catch (err) {
+                    console.warn('[Update] CacheStorage cleanup failed:', err);
+                }
+            }
+        }
+    };
+
+    const state = {
+        storedVersion: storage.get(STORAGE_KEYS.version) || SETTINGS.version,
+        lastUpdate: parseInt(storage.get(STORAGE_KEYS.lastUpdate) || '0', 10) || 0,
+        gapList: readGapList(),
+        inFlight: false,
+        timer: null,
+    };
+
+    if (!storage.get(STORAGE_KEYS.version)) {
+        storage.set(STORAGE_KEYS.version, state.storedVersion);
     }
 
-    function schedule() { timer = setTimeout(check, INTERVAL); }
+    function persistGapList() {
+        const limited = state.gapList.slice(-6);
+        storage.set(STORAGE_KEYS.gapList, JSON.stringify(limited));
+    }
 
-    function shouldDeferQuiet() { return (Date.now() - lastUpdateTs) < QUIET; }
+    function lockUpdate() {
+        window.__UPDATE_LOCK__ = true;
+    }
 
-    function queueGap(v) { gapList.push(v); saveGap(); }
+    function unlockUpdate() {
+        delete window.__UPDATE_LOCK__;
+    }
 
     function buildGapInfo() {
-        return gapList.length > 1 ? ' ' + t('updateCumulative') + ' ' + gapList.length + ' ' + t('updateVersionSpan') : '';
+        if (state.gapList.length <= 1) return '';
+        return ' ' + t('updateCumulative') + ' ' + state.gapList.length + ' ' + t('updateVersionSpan');
     }
 
-    function lockUpdate() { window.__UPDATE_LOCK__ = true; }
-    function unlockUpdate() { delete window.__UPDATE_LOCK__; }
-
-    async function applyUpdate() {
-        try { window.releaseMemory && window.releaseMemory(2); } catch (_) { }
-        if ('caches' in window) { try { caches.keys().then(keys => keys.forEach(k => caches.delete(k))); } catch (_) { } }
-        const url = new URL(location.href); url.searchParams.set('v', Date.now());
-        localStorage.setItem(KEY_VERSION, 'pending-' + Date.now());
-        localStorage.setItem(KEY_LAST_UPD, Date.now().toString());
-        location.replace(url.toString());
+    async function fetchRemoteVersion(attempt = 0) {
+        const url = SETTINGS.source + (SETTINGS.source.includes('?') ? '&' : '?') + 'v=' + Date.now();
+        try {
+            const response = await fetch(url, { cache: 'no-store' });
+            if (!response.ok) return null;
+            const text = await response.text();
+            return versionParser.parse(text);
+        } catch (err) {
+            if (attempt + 1 >= SETTINGS.maxRetries) return null;
+            const delay = SETTINGS.retryBaseDelay * Math.pow(2, attempt);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return fetchRemoteVersion(attempt + 1);
+        }
     }
-    window.applySiteUpdate = applyUpdate;
 
-    function proceedUpdate(remote) {
-        if (shouldDeferQuiet()) {
-            addAnn(t('updateNewVersion') + ' ' + remote + ' ' + t('updateQuietPeriod'), true);
-            schedule();
+    async function applyUpdate(remoteVersion) {
+        lockUpdate();
+        const stamp = Date.now();
+        storage.set(STORAGE_KEYS.version, 'pending-' + stamp);
+        storage.set(STORAGE_KEYS.lastUpdate, stamp.toString());
+        state.lastUpdate = stamp;
+
+        await cacheCleaner.flushAll();
+
+        const url = new URL(window.location.href);
+        url.searchParams.set('v', stamp);
+
+        if (remoteVersion) {
+            window.__PENDING_UPDATE__ = undefined;
+        }
+
+        window.location.replace(url.toString());
+    }
+
+    function scheduleNext() {
+        if (state.timer) clearTimeout(state.timer);
+        state.timer = window.setTimeout(checkForUpdate, SETTINGS.checkInterval);
+    }
+
+    function shouldDeferByQuietWindow() {
+        return (Date.now() - state.lastUpdate) < SETTINGS.quietWindow;
+    }
+
+    function queueGap(version) {
+        const last = state.gapList[state.gapList.length - 1];
+        if (last === version) return;
+        state.gapList.push(version);
+        persistGapList();
+    }
+
+    function proceed(remoteVersion) {
+        if (shouldDeferByQuietWindow()) {
+            announcer.push(t('updateNewVersion') + ' ' + remoteVersion + ' ' + t('updateQuietPeriod'));
+            scheduleNext();
             return;
         }
-        if (document.hidden) {
-            window.__PENDING_UPDATE__ = remote;
-            addAnn(t('updateReady') + ' ' + remote + ' ' + t('updateReadySuffix'), true);
-            schedule();
-            return;
-        }
-        setTimeout(() => {
+
+        const runRefresh = () => {
             lockUpdate();
-            addAnn(t('updateFound') + ' ' + remote + buildGapInfo() + t('updateWillRefresh'), true);
-            setTimeout(applyUpdate, 1500);
-        }, NOTIFY_DELAY);
+            announcer.push(t('updateFound') + ' ' + remoteVersion + buildGapInfo() + t('updateWillRefresh'));
+            setTimeout(() => applyUpdate(remoteVersion), 1500);
+        };
+
+        if (document.hidden) {
+            window.__PENDING_UPDATE__ = remoteVersion;
+            announcer.push(t('updateReady') + ' ' + remoteVersion + ' ' + t('updateReadySuffix'));
+            scheduleNext();
+            return;
+        }
+
+        if (splashActive()) {
+            const waitSplash = () => {
+                if (!splashActive()) {
+                    runRefresh();
+                } else {
+                    setTimeout(waitSplash, 380);
+                }
+            };
+            waitSplash();
+            return;
+        }
+
+    setTimeout(runRefresh, SETTINGS.notifyDelay);
     }
 
-    async function check() {
-        if (inFlight) { return; }
-        inFlight = true;
+    async function checkForUpdate() {
+        if (state.inFlight) return;
+        state.inFlight = true;
+
         const remote = await fetchRemoteVersion();
-        inFlight = false;
-        if (!remote) { schedule(); return; }
-        if (remote !== stored) {
+
+        state.inFlight = false;
+
+        if (!remote) {
+            scheduleNext();
+            return;
+        }
+
+        if (window.__PENDING_UPDATE__ && window.__PENDING_UPDATE__ === remote) {
+            scheduleNext();
+            return;
+        }
+
+        if (remote !== state.storedVersion) {
             queueGap(remote);
-            const run = () => proceedUpdate(remote);
-            if (splashActive()) {
-                const wait = () => { if (!splashActive()) run(); else setTimeout(wait, 380); }; wait();
-            } else run();
+            proceed(remote);
         } else {
-            schedule();
+            scheduleNext();
         }
     }
 
-    // 刷新后回写 & 公告
-    if (stored && stored.startsWith('pending-')) {
-        localStorage.setItem(KEY_VERSION, VERSION);
-        lastUpdateTs = Date.now(); localStorage.setItem(KEY_LAST_UPD, lastUpdateTs.toString());
-        let msg = t('updateComplete') + ' ' + VERSION;
-        if (gapList.length > 1) msg += ' ' + t('updateCumulative') + ' ' + gapList.length + ' ' + t('updateVersions');
-        addAnn(msg, true);
-        gapList = []; saveGap();
+    function handlePostRefresh() {
+        if (!state.storedVersion || !state.storedVersion.startsWith('pending-')) return;
+
+    storage.set(STORAGE_KEYS.version, SETTINGS.version);
+    state.storedVersion = SETTINGS.version;
+        const now = Date.now();
+        state.lastUpdate = now;
+        storage.set(STORAGE_KEYS.lastUpdate, now.toString());
+
+        let message = t('updateComplete') + ' ' + SETTINGS.version;
+        if (state.gapList.length > 1) {
+            message += ' ' + t('updateCumulative') + ' ' + state.gapList.length + ' ' + t('updateVersions');
+        }
+        announcer.push(message);
+
+        state.gapList = [];
+        persistGapList();
         unlockUpdate();
     }
 
-    // 页面重新可见 -> 若有挂起更新立即执行
     document.addEventListener('visibilitychange', () => {
-        if (!document.hidden && window.__PENDING_UPDATE__) {
-            const v = window.__PENDING_UPDATE__; delete window.__PENDING_UPDATE__;
-            lockUpdate();
-            addAnn(t('updateApplying') + ' ' + v + ' …', true);
-            setTimeout(applyUpdate, 600);
-        }
+        if (document.hidden) return;
+        if (!window.__PENDING_UPDATE__) return;
+
+        const version = window.__PENDING_UPDATE__;
+        window.__PENDING_UPDATE__ = undefined;
+        announcer.push(t('updateApplying') + ' ' + version + ' …');
+        setTimeout(() => applyUpdate(version), 600);
     });
 
-    // 暴露手动触发
-    window.checkForUpdates = () => { clearTimeout(timer); check(); };
+    window.applySiteUpdate = () => applyUpdate();
+    window.checkForUpdates = () => {
+        if (state.timer) clearTimeout(state.timer);
+        checkForUpdate();
+    };
 
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', check, { once: true }); else check();
+    handlePostRefresh();
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkForUpdate, { once: true });
+    } else {
+        checkForUpdate();
+    }
 })();

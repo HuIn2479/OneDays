@@ -4,6 +4,14 @@
 
     const cfg = window.__APP_CONFIG__ || {};
 
+    const navigationState = {
+        cards: Array.isArray(cfg.navigationCards) ? cfg.navigationCards.slice() : [],
+        filter: 'all',
+        filtersEnabled: !!cfg.enableNavigationFilters,
+        filterTags: Array.isArray(cfg.navigationFilterTags) ? cfg.navigationFilterTags.filter(Boolean) : [],
+        filterBar: null,
+    };
+
     // 检查是否启用导航功能
     if (!cfg.enableNavigation || !cfg.navigationCards) {
         return;
@@ -15,7 +23,7 @@
      * @returns {HTMLElement} 创建的卡片元素
      */
     function createNavCard(cardConfig) {
-        const { id, icon, title, description, url, target = '_self' } = cardConfig;
+        const { id, icon, title, description, url, target = '_self', tags } = cardConfig;
 
         // 创建主容器
         const card = document.createElement('a');
@@ -24,6 +32,9 @@
         card.target = target;
         card.setAttribute('data-nav-id', id);
         card.setAttribute('title', `导航到${title}`);
+        if (Array.isArray(tags) && tags.length) {
+            card.dataset.tags = tags.join(',');
+        }
 
         // 创建图标
         const iconEl = document.createElement('div');
@@ -62,6 +73,16 @@
     /**
      * 初始化导航卡片
      */
+    function getFilteredCards() {
+        if (!navigationState.filtersEnabled || navigationState.filter === 'all') {
+            return navigationState.cards;
+        }
+        return navigationState.cards.filter(card => {
+            const tags = Array.isArray(card.tags) ? card.tags : [];
+            return tags.includes(navigationState.filter);
+        });
+    }
+
     function initNavigation() {
         const container = document.getElementById('navCards');
         if (!container) {
@@ -73,7 +94,7 @@
         container.innerHTML = '';
 
         // 生成卡片
-        const cards = cfg.navigationCards || [];
+        const cards = getFilteredCards();
         if (cards.length === 0) {
             console.warn('[Navigation] 没有配置导航卡片');
             return;
@@ -92,7 +113,7 @@
         container.appendChild(fragment);
         container.hidden = false;
 
-        console.log(`[Navigation] 成功加载 ${cards.length} 个导航卡片`);
+        console.log(`[Navigation] 成功加载 ${cards.length} 个导航卡片，当前筛选: ${navigationState.filter}`);
     }
 
     /**
@@ -135,23 +156,71 @@
         if (!Array.isArray(newCards)) return;
 
         cfg.navigationCards = newCards;
+        navigationState.cards = newCards.slice();
         initNavigation();
+    }
+
+    function setFilter(tag) {
+        navigationState.filter = tag;
+        initNavigation();
+        if (navigationState.filterBar) {
+            const buttons = navigationState.filterBar.querySelectorAll('.nav-filter-btn');
+            buttons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === tag);
+            });
+        }
+    }
+
+    function buildFilterBar() {
+        if (!navigationState.filtersEnabled) return;
+        const tags = navigationState.filterTags;
+        if (!tags.length) return;
+
+        const container = document.getElementById('navCards');
+        if (!container || navigationState.filterBar) return;
+
+        const bar = document.createElement('div');
+        bar.className = 'nav-filter-bar reveal-item';
+
+        const allButton = document.createElement('button');
+        allButton.type = 'button';
+        allButton.className = 'nav-filter-btn active';
+        allButton.dataset.filter = 'all';
+        allButton.textContent = window.__I18N__?.t?.('All') || '全部';
+        allButton.addEventListener('click', () => setFilter('all'));
+        bar.appendChild(allButton);
+
+        tags.forEach(tag => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'nav-filter-btn';
+            btn.dataset.filter = tag;
+            btn.textContent = tag;
+            btn.addEventListener('click', () => setFilter(tag));
+            bar.appendChild(btn);
+        });
+
+        container.parentNode.insertBefore(bar, container);
+        navigationState.filterBar = bar;
     }
 
     // 暴露公共API
     window.__NAVIGATION__ = {
         init: initNavigation,
         update: updateNavigation,
-        create: createNavCard
+        create: createNavCard,
+        filter: setFilter
     };
 
     // 页面加载完成后初始化
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
+            buildFilterBar();
             initNavigation();
             bindEvents();
         });
     } else {
+        buildFilterBar();
         initNavigation();
         bindEvents();
     }

@@ -216,6 +216,289 @@ body {
 .btn:active {transform:scale(.95);} 
 .btn:focus-visible {outline:none;box-shadow:var(--focus);} 
 
+/* 主题 & 语言联动卡片 */
+.theme-lang-panel {
+  position: fixed;
+  z-index: 1000;
+  min-width: 236px;
+  max-width: 280px;
+  padding: 1.05rem 1.05rem 1rem;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--bg-alt) 75%, transparent) 0%, color-mix(in srgb, var(--bg) 85%, transparent) 100%);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: 0 20px 48px -18px rgba(15, 19, 28, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 14px) scale(0.95);
+  transition: opacity .2s ease, transform .24s cubic-bezier(.16,.8,.3,1);
+  isolation: isolate;
+}
+
+.theme-lang-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 40%, transparent) 0%, transparent 70%);
+  pointer-events: none;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.theme-lang-panel.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0) scale(1);
+}
+
+[data-theme="dark"] .theme-lang-panel {
+  background: linear-gradient(155deg, rgba(23, 27, 35, 0.92), rgba(17, 20, 26, 0.94));
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 26px 58px -22px rgba(5, 6, 9, 0.85);
+}
+
+.theme-lang-header {
+  font-size: 0.8rem;
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  color: var(--fg);
+  letter-spacing: 0.06em;
+}
+
+.theme-lang-hint {
+  margin-top: 0.25rem;
+  margin-bottom: 0.85rem;
+  font-size: 0.63rem;
+  text-align: center;
+  color: var(--fg-mute);
+  letter-spacing: 0.05em;
+}
+
+.theme-lang-theme {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-bottom: 0.9rem;
+}
+
+.theme-lang-theme-title {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  text-align: center;
+  color: color-mix(in srgb, var(--fg-mute) 85%, var(--accent) 15%);
+}
+
+.theme-lang-theme-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.theme-lang-theme-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.38rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  background: color-mix(in srgb, var(--bg-alt) 80%, transparent);
+  color: var(--fg-soft);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.theme-lang-theme-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+
+.theme-lang-theme-btn.active {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 12px 26px rgba(0,0,0,.18);
+}
+
+.theme-lang-theme-icon {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.theme-lang-theme-text {
+  font-size: 0.64rem;
+}
+
+.theme-lang-accent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.95rem;
+}
+
+.theme-lang-accent-title {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  text-align: center;
+  color: color-mix(in srgb, var(--fg-mute) 78%, var(--accent) 22%);
+}
+
+.theme-lang-accent-list {
+  display: flex;
+  justify-content: center;
+  gap: 0.52rem;
+  flex-wrap: wrap;
+}
+
+.theme-lang-accent-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  background: var(--swatch-color, var(--accent));
+  position: relative;
+  cursor: pointer;
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-lang-accent-dot::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: inherit;
+  background: color-mix(in srgb, #fff 20%, transparent);
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity .22s ease, transform .22s ease;
+}
+
+.theme-lang-accent-dot:hover {
+  transform: translateY(-1px) scale(1.03);
+  border-color: color-mix(in srgb, var(--swatch-color, var(--accent)) 50%, transparent);
+  box-shadow: 0 10px 22px rgba(0,0,0,.18);
+}
+
+.theme-lang-accent-dot:focus-visible {
+  outline: none;
+  transform: scale(1.05);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--swatch-color, var(--accent)) 45%, transparent), 0 10px 24px rgba(0,0,0,.22);
+}
+
+.theme-lang-accent-dot.active {
+  transform: scale(1.08);
+  border-color: var(--swatch-color, var(--accent));
+  box-shadow: 0 12px 26px rgba(0,0,0,.24), 0 0 0 3px color-mix(in srgb, var(--swatch-color, var(--accent)) 50%, transparent);
+}
+
+.theme-lang-accent-dot.active::after {
+  opacity: 0.36;
+  transform: scale(0.9);
+}
+
+.theme-lang-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.theme-lang-option {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.52rem 0.65rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  color: var(--fg);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all .22s ease;
+}
+
+.theme-lang-option:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg) 88%);
+  color: var(--accent);
+  box-shadow: 0 10px 20px rgba(0,0,0,.12);
+}
+
+.theme-lang-option.active {
+  border-color: transparent;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 14px 30px rgba(0,0,0,.22);
+}
+
+.theme-lang-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.28;
+  transform: translateY(1px);
+}
+
+.theme-lang-option.active .theme-lang-dot {
+  opacity: 0.9;
+}
+
+.theme-lang-name {
+  text-align: left;
+}
+
+.theme-lang-code {
+  font-size: 0.62rem;
+  opacity: 0.55;
+}
+
+.theme-lang-option.active .theme-lang-code {
+  opacity: 0.88;
+}
+
+.theme-lang-current {
+  margin-left: 0.2rem;
+  padding: 0.16rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.22);
+  color: #fff;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+}
+
+[data-theme="dark"] .theme-lang-option {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.04);
+}
+
+[data-theme="dark"] .theme-lang-option:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--accent);
+}
+
+.theme-lang-empty {
+  text-align: center;
+  font-size: 0.64rem;
+  color: var(--fg-mute);
+  letter-spacing: 0.04em;
+}
+
 /* 导航卡片 */
 .nav-cards {
   margin: 2rem auto 0;
@@ -225,6 +508,57 @@ body {
   gap: 1rem;
   max-width: 600px;
   width: 100%;
+}
+
+.nav-filter-bar {
+  margin: 1.5rem auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  max-width: 520px;
+}
+
+.nav-filter-btn {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  color: var(--fg-soft);
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition), transform 0.25s ease;
+}
+
+.nav-filter-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.nav-filter-btn.active {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] .nav-filter-btn {
+  background: var(--bg-alt);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--fg-mute);
+}
+
+[data-theme="dark"] .nav-filter-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+[data-theme="dark"] .nav-filter-btn.active {
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
 .nav-card {
@@ -334,6 +668,14 @@ body {
   .announcement{top:.65rem;padding:.7rem .75rem .75rem;font-size:.66rem;border-radius:16px;}
   .accent-panel{bottom:.75rem;right:.75rem;}
   .toast-container{top:10%;gap:.45rem;}
+  .nav-filter-bar {
+    margin: 1.2rem auto 0;
+    gap: 0.45rem;
+  }
+  .nav-filter-btn {
+    font-size: 0.65rem;
+    padding: 0.35rem 0.75rem;
+  }
   .nav-cards {
     margin: 1.5rem auto 0;
     gap: 0.8rem;

@@ -4,6 +4,7 @@
     const root = document.documentElement;
     const body = document.body;
     const accents = cfg.accents || [];
+    const integratedAccent = window.__THEME_PANEL_SUPPORTS_ACCENTS__ === true;
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let lowPower = false; try { lowPower = matchMedia('(prefers-reduced-data: reduce)').matches; } catch (_) { }
 
@@ -29,7 +30,7 @@
     }
 
     function bindAccentPanel() {
-        if (!cfg.enableAccentPanel || accents.length < 2) return;
+        if (!cfg.enableAccentPanel || accents.length < 2 || integratedAccent) return;
         const themeBtn = document.getElementById('themeToggle');
         if (!themeBtn || themeBtn.dataset.accentBound) return;
         themeBtn.dataset.accentBound = '1';
