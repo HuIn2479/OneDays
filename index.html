@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow,noarchive" />
+  <meta name="theme-color" content="#f33" />
+  <title>OneDay'S Home</title>
+  <!-- 站点图标 -->
+  <link rel="icon" href="/image/logo/index.jpg" />
+  <link rel="apple-touch-icon" href="/image/logo/index.jpg" />
+  <!-- 预加载与性能优化 -->
+  <link rel="preload" href="/css/index.css" as="style" />
+  <link rel="stylesheet" href="/css/index.css" />
+  <link rel="preconnect" href="https://v1.hitokoto.cn" crossorigin />
+  <link rel="stylesheet" href="/css/maomao.css" />
+  <script src="/js/i18n.js"></script>
+</head>
+
+<body>
+  <div id="announcement" class="announcement" aria-label="站点公告" role="status" aria-live="polite" hidden>
+    <div class="ann-icon" aria-hidden="true"></div>
+    <span class="ann-text"></span>
+    <button class="ann-close" data-i18n-attr='{"aria-label":"announcementClose","title":"close"}' hidden>
+      <span class="close-icon">✕</span>
+    </button>
+  </div>
+  <main class="main" aria-label="主页">
+    <div class="hero reveal">
+      <h1 class="title" id="siteTitle">忆窝</h1>
+      <h2 class="subtitle" id="siteSubtitle">One Day.</h2>
+      <p class="runtime skeleton">
+        <span id="timeDate" data-i18n="loading">加载中…</span><span id="times" data-i18n="loading">加载中…</span>
+      </p>
+      <div class="actions">
+        <button id="themeToggle" class="btn" data-i18n-attr='{"aria-label":"themeToggle","title":"themeToggleTitle"}'>
+          🌓
+        </button>
+      </div>
+      
+      <!-- 导航卡片容器 -->
+      <div id="navCards" class="nav-cards" hidden></div>
+    </div>
+  </main>
+
+  <!-- 开屏动画 -->
+  <div id="splash" class="splash" data-i18n-attr='{"aria-label":"splashLoading"}'>
+    <div class="splash-inner">
+      <div class="splash-logo">🌸</div>
+      <div class="splash-title" data-i18n="loadingProgress">Loading...</div>
+      <div class="splash-bar"><span></span></div>
+    </div>
+  </div>
+
+  <div id="maomao" aria-label="小猫"></div>
+
+  <footer class="footer reveal">
+    <p class="reveal-item">© <span id="year"></span> 〇Enshō🌸</p>
+        <div id="hitokoto" class="skeleton" hidden>
+      <a href="#" id="hitokoto_text" rel="noopener" data-i18n-attr='{"title":"hitokotoTitle"}' data-i18n="hitokotoLoading">加载中..🍀</a>
+    </div>
+  </footer>
+
+  <!-- 外部 API -->
+  <!-- 轻量内联配置（若需修改请同步 js/config.js 或改为仅引用外部） -->
+  <script>
+    /* inline config snapshot */
+    if (!window.__APP_CONFIG__) {
+      window.__APP_CONFIG__ = {
+        meta: {
+          launchDate: "2021-02-27T00:00:00+08:00",
+          title: "忆窝",
+          subtitle: "One Day.",
+        },
+      };
+    }
+  </script>
+  <!-- 核心脚本 + 其余模块 -->
+  <script src="/js/config.js" defer></script>
+  <script src="/js/update-check.js" defer></script>
+  <script src="/js/navigation.js" defer></script>
+  <script src="/js/core.js" defer></script>
+  <script src="/js/announcement.js" defer></script>
+  <script src="/js/theme.js" defer></script>
+  <script src="/js/extras.js" defer></script>
+  <script src="/js/loader.js" defer></script>
+  <script src="/js/app-init.js" defer></script>
+  <script src="/js/lazy.js" defer></script>
+</body>
+
+</html>
