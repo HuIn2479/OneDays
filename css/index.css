@@ -256,6 +256,14 @@ body {
   transform: translate(-50%, 0) scale(1);
 }
 
+.theme-lang-panel.theme-lang-panel--above {
+  transform: translate(-50%, -14px) scale(0.95);
+}
+
+.theme-lang-panel.theme-lang-panel--above.open {
+  transform: translate(-50%, 0) scale(1);
+}
+
 [data-theme="dark"] .theme-lang-panel {
   background: linear-gradient(155deg, rgba(23, 27, 35, 0.92), rgba(17, 20, 26, 0.94));
   border-color: rgba(255, 255, 255, 0.06);

@@ -538,10 +538,30 @@
 	function positionLanguagePanel() {
 		if (!langPanel || langPanel.hidden || !toggleBtn) return;
 		const rect = toggleBtn.getBoundingClientRect();
-		const top = Math.min(window.innerHeight - 24, Math.max(16, rect.bottom + 12));
-		const centerX = Math.min(window.innerWidth - 24, Math.max(24, rect.left + rect.width / 2));
+		const margin = 16;
+		const gap = 12;
+		const viewportWidth = window.innerWidth;
+		const viewportHeight = window.innerHeight;
+		const panelHeight = langPanel.offsetHeight || langPanel.scrollHeight || langPanel.getBoundingClientRect().height || 0;
+		let top = rect.bottom + gap;
+		let showAbove = false;
+		const fitsBelow = top + panelHeight <= viewportHeight - margin;
+		if (!fitsBelow) {
+			const aboveTop = rect.top - panelHeight - gap;
+			if (aboveTop >= margin) {
+				top = aboveTop;
+				showAbove = true;
+			} else {
+				top = Math.max(margin, viewportHeight - panelHeight - margin);
+			}
+		} else {
+			top = Math.max(margin, top);
+		}
+		const centerX = rect.left + rect.width / 2;
+		const clampedCenter = Math.min(viewportWidth - margin, Math.max(margin, centerX));
 		langPanel.style.top = `${top}px`;
-		langPanel.style.left = `${centerX}px`;
+		langPanel.style.left = `${clampedCenter}px`;
+		langPanel.classList.toggle('theme-lang-panel--above', showAbove);
 	}
 
 	function handleOutsidePress(event) {
