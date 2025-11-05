@@ -40,18 +40,12 @@
       </div>
       
       <!-- 导航卡片容器 -->
-      <div id="navCards" class="nav-cards" hidden></div>
+      <div id="navCards" class="nav-cards skeleton" hidden></div>
     </div>
   </main>
 
   <!-- 开屏动画 -->
-  <div id="splash" class="splash" data-i18n-attr='{"aria-label":"splashLoading"}'>
-    <div class="splash-inner">
-      <div class="splash-logo">🌸</div>
-      <div class="splash-title" data-i18n="loadingProgress">Loading...</div>
-      <div class="splash-bar"><span></span></div>
-    </div>
-  </div>
+  <div id="splash" class="splash" data-i18n-attr='{"aria-label":"splashLoading"}'></div>
 
   <div id="maomao" aria-label="小猫"></div>
 
@@ -63,19 +57,6 @@
   </footer>
 
   <!-- 外部 API -->
-  <!-- 轻量内联配置（若需修改请同步 js/config.js 或改为仅引用外部） -->
-  <script>
-    /* inline config snapshot */
-    if (!window.__APP_CONFIG__) {
-      window.__APP_CONFIG__ = {
-        meta: {
-          launchDate: "2021-02-27T00:00:00+08:00",
-          title: "忆窝",
-          subtitle: "One Day.",
-        },
-      };
-    }
-  </script>
   <!-- 核心脚本 + 其余模块 -->
   <script src="/js/config.js" defer></script>
   <script src="/js/update-check.js" defer></script>
@@ -87,6 +68,9 @@
   <script src="/js/loader.js" defer></script>
   <script src="/js/app-init.js" defer></script>
   <script src="/js/lazy.js" defer></script>
+
+  <!-- 主题切换遮罩 -->
+  <div id="themeMask" class="theme-mask" hidden></div>
 </body>
 
 </html>

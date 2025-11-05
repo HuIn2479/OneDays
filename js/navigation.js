@@ -90,6 +90,9 @@
             return;
         }
 
+        // 显示容器并开始加载
+        container.hidden = false;
+
         // 清空容器
         container.innerHTML = '';
 
@@ -97,6 +100,7 @@
         const cards = getFilteredCards();
         if (cards.length === 0) {
             console.warn('[Navigation] 没有配置导航卡片');
+            container.classList.remove('skeleton');
             return;
         }
 
@@ -111,7 +115,8 @@
         });
 
         container.appendChild(fragment);
-        container.hidden = false;
+        // 移除骨架屏，显示真实内容
+        container.classList.remove('skeleton');
 
         console.log(`[Navigation] 成功加载 ${cards.length} 个导航卡片，当前筛选: ${navigationState.filter}`);
     }

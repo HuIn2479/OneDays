@@ -1,7 +1,7 @@
 // 全局配置
 (function () {
   const config = {
-    version: "v0.11.8",
+    version: "v0.12.3",
     meta: {
       launchDate: "2021-02-27T00:00:00+08:00",
       title: "忆窝",
@@ -12,6 +12,8 @@
       minDuration: 1000,
       removeIfFast: true,
       skeletonFadeDelay: 120,
+      heading: "忆窝",
+      subheading: "Sakura daydreams are loading…",
     },
     theme: {
       accents: [
@@ -136,6 +138,8 @@
     splashMinDuration: config.splash.minDuration,
     removeSplashIfFast: config.splash.removeIfFast,
     skeletonFadeDelay: config.splash.skeletonFadeDelay,
+  splashHeading: config.splash.heading,
+  splashSubheading: config.splash.subheading,
     accents: config.theme.accents,
     defaultAccentIndex: config.theme.defaultAccentIndex,
     enableAccentPanel: config.theme.enableAccentPanel,
