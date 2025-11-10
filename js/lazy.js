@@ -1,4 +1,3 @@
-// lazy.js: 延迟加载低优先级脚本 (hitokoto / maomao / jinzhifuzhi)
 ; (function () {
     const cfg = window.__APP_CONFIG__ || {};
     const loadScript = (src) => new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.defer = true; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
@@ -6,6 +5,9 @@
 
     // 延迟加载 F12 限制与小猫交互
     idle(() => { loadScript('/js/maomao.js'); loadScript('/js/no-copy.js'); });
+
+    // 延迟加载更新检查和额外功能
+    idle(() => { loadScript('/js/update-check.js'); loadScript('/js/extras.js'); });
 
     // 一言：智能延迟加载
     if (cfg.enableHitokoto !== false) {

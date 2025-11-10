@@ -1,4 +1,3 @@
-// navigation.js - 导航卡片动态生成
 (function () {
     'use strict';
 
@@ -10,6 +9,8 @@
         filtersEnabled: !!cfg.enableNavigationFilters,
         filterTags: Array.isArray(cfg.navigationFilterTags) ? cfg.navigationFilterTags.filter(Boolean) : [],
         filterBar: null,
+        maxDisplayCount: cfg.navigationMaxDisplayCount || 6,
+        showAll: cfg.navigationShowAll || false,
     };
 
     // 检查是否启用导航功能
@@ -71,6 +72,176 @@
     }
 
     /**
+     * 创建"查看更多"按钮
+     * @param {number} remainingCount 剩余卡片数量
+     * @returns {HTMLElement} 创建的按钮元素
+     */
+    function createMoreButton(remainingCount) {
+        const button = document.createElement('button');
+        button.className = 'nav-more-btn';
+        button.type = 'button';
+        button.setAttribute('aria-label', `查看更多 ${remainingCount} 个导航卡片`);
+
+        const icon = document.createElement('span');
+        icon.className = 'nav-more-icon';
+        icon.textContent = '⋯';
+
+        const text = document.createElement('span');
+        text.className = 'nav-more-text';
+        text.textContent = `查看更多 (+${remainingCount})`;
+
+        button.appendChild(icon);
+        button.appendChild(text);
+
+        button.addEventListener('click', () => showAllCardsModal());
+
+        return button;
+    }
+
+    /**
+     * 显示所有卡片的模态框
+     */
+    function showAllCardsModal() {
+        const allCards = getFilteredCards();
+        if (allCards.length <= navigationState.maxDisplayCount) return;
+
+        // 模态框状态
+        let modalShowAll = false; // 模态框内的显示模式，默认为分页显示
+        let cardsGrid; // 引用网格容器
+
+        // 更新模态框内容
+        function updateModalContent() {
+            if (!cardsGrid) return;
+
+            const displayCards = modalShowAll ? allCards : allCards.slice(navigationState.maxDisplayCount);
+
+            // 清空现有内容
+            cardsGrid.innerHTML = '';
+
+            // 重新添加卡片
+            displayCards.forEach(cardConfig => {
+                try {
+                    const cardElement = createNavCard(cardConfig);
+                    cardsGrid.appendChild(cardElement);
+                } catch (error) {
+                    console.error('[Navigation] 创建模态框卡片失败:', cardConfig, error);
+                }
+            });
+
+            // 更新标题
+            modalTitle.textContent = modalShowAll ?
+                `所有导航 (${allCards.length})` :
+                `更多导航 (${displayCards.length})`;
+
+            // 更新切换按钮状态
+            toggleButton.classList.toggle('active', modalShowAll);
+            toggleButton.setAttribute('aria-label',
+                modalShowAll ? '切换到仅显示更多' : '切换到显示全部');
+
+            // 更新按钮内容
+            const toggleContent = toggleButton.querySelector('.nav-modal-toggle-content');
+            if (toggleContent) {
+                toggleContent.textContent = modalShowAll ? '⊖ 收起' : '⊕ 展开';
+            }
+        }
+
+        // 创建模态框
+        const modal = document.createElement('div');
+        modal.className = 'nav-modal-overlay';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'nav-modal-title');
+
+        const modalContent = document.createElement('div');
+        modalContent.className = 'nav-modal-content';
+
+        // 模态框头部
+        const modalHeader = document.createElement('div');
+        modalHeader.className = 'nav-modal-header';
+
+        const modalTitle = document.createElement('h2');
+        modalTitle.id = 'nav-modal-title';
+        modalTitle.className = 'nav-modal-title';
+        modalTitle.textContent = `所有导航 (${allCards.length})`;
+
+        // 添加切换按钮
+        const toggleButton = document.createElement('button');
+        toggleButton.className = 'nav-modal-toggle';
+        toggleButton.type = 'button';
+        toggleButton.setAttribute('aria-label', '切换显示模式');
+
+        // 创建按钮内容容器
+        const toggleContent = document.createElement('span');
+        toggleContent.className = 'nav-modal-toggle-content';
+        toggleButton.appendChild(toggleContent);
+
+        const closeButton = document.createElement('button');
+        closeButton.className = 'nav-modal-close';
+        closeButton.type = 'button';
+        closeButton.setAttribute('aria-label', '关闭');
+        closeButton.innerHTML = '✕';
+
+        modalHeader.appendChild(modalTitle);
+        modalHeader.appendChild(toggleButton);
+        modalHeader.appendChild(closeButton);
+
+        // 模态框主体
+        const modalBody = document.createElement('div');
+        modalBody.className = 'nav-modal-body';
+
+        cardsGrid = document.createElement('div');
+        cardsGrid.className = 'nav-modal-grid';
+
+        modalBody.appendChild(cardsGrid);
+
+        // 组装模态框
+        modalContent.appendChild(modalHeader);
+        modalContent.appendChild(modalBody);
+        modal.appendChild(modalContent);
+
+        // 初始化内容
+        updateModalContent();
+
+        // 添加到页面
+        document.body.appendChild(modal);
+
+        // 绑定事件
+        const closeModal = () => {
+            modal.classList.add('closing');
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.parentNode.removeChild(modal);
+                }
+            }, 300);
+        };
+
+        closeButton.addEventListener('click', closeModal);
+        toggleButton.addEventListener('click', () => {
+            modalShowAll = !modalShowAll;
+            updateModalContent();
+        });
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // ESC键关闭
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+
+        // 动画进入
+        requestAnimationFrame(() => {
+            modal.classList.add('open');
+        });
+    }
+
+    /**
      * 初始化导航卡片
      */
     function getFilteredCards() {
@@ -98,14 +269,17 @@
 
         // 生成卡片
         const cards = getFilteredCards();
-        if (cards.length === 0) {
+        const displayCards = navigationState.showAll ? cards : cards.slice(0, navigationState.maxDisplayCount);
+        const hasMoreCards = cards.length > navigationState.maxDisplayCount;
+
+        if (displayCards.length === 0) {
             console.warn('[Navigation] 没有配置导航卡片');
             container.classList.remove('skeleton');
             return;
         }
 
         const fragment = document.createDocumentFragment();
-        cards.forEach(cardConfig => {
+        displayCards.forEach(cardConfig => {
             try {
                 const cardElement = createNavCard(cardConfig);
                 fragment.appendChild(cardElement);
@@ -115,10 +289,30 @@
         });
 
         container.appendChild(fragment);
+
+        // 如果有更多卡片，在容器外部添加"查看更多"按钮
+        if (hasMoreCards && !navigationState.showAll) {
+            // 移除现有的查看更多按钮
+            const existingButton = container.parentElement?.querySelector('.nav-more-btn');
+            if (existingButton) {
+                existingButton.remove();
+            }
+
+            const moreButton = createMoreButton(cards.length - navigationState.maxDisplayCount);
+            // 将按钮添加到导航容器的父元素中
+            container.parentElement?.appendChild(moreButton);
+        } else {
+            // 如果没有更多卡片，移除现有的查看更多按钮
+            const existingButton = container.parentElement?.querySelector('.nav-more-btn');
+            if (existingButton) {
+                existingButton.remove();
+            }
+        }
+
         // 移除骨架屏，显示真实内容
         container.classList.remove('skeleton');
 
-        console.log(`[Navigation] 成功加载 ${cards.length} 个导航卡片，当前筛选: ${navigationState.filter}`);
+        console.log(`[Navigation] 成功加载 ${displayCards.length} 个导航卡片${hasMoreCards ? ` (共${cards.length}个)` : ''}，当前筛选: ${navigationState.filter}`);
     }
 
     /**

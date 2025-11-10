@@ -1,4 +1,3 @@
-// 轻量随机位置调整 (不依赖 jQuery)
 const rand = (a, b = a) => Math.floor(Math.random() * (b - a + 1)) + a;
 let lastMove = 0;
 let globalCatEl = null; // 缓存引用，便于清理

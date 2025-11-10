@@ -1,7 +1,6 @@
-// 全局配置
 (function () {
   const config = {
-    version: "v0.12.3",
+    version: "v0.12.8",
     meta: {
       launchDate: "2021-02-27T00:00:00+08:00",
       title: "忆窝",
@@ -32,13 +31,13 @@
         schedule: {
           dawn: 0,
           noon: 1,
-          dusk: 3,
+          dusk: 2,
           night: 4,
         },
       },
     },
     effects: {
-      enableScrollProgress: false, // 启用滚动进度
+      enableScrollProgress: true, // 启用滚动进度
     },
     runtime: {
       enable: true, // 启用运行时间显示
@@ -66,12 +65,11 @@
       icon: "😽",
       messages: [
         "平安喜樂，萬事勝意，祝你，祝我，祝我們",
-        "关注卡拉彼丘喵！关注卡拉彼丘谢谢喵！",
         "ISTP-A | 机械键盘爱好者 | 猫奴",
       ],
       cycleInterval: 4800,
       transition: 500,
-      dismissKey: "ann-v3",
+      dismissKey: "ann-v4",
       closeButton: true,
       remoteFeed: {
         enable: false,
@@ -94,6 +92,8 @@
     },
     navigation: {
       enable: true,
+      maxDisplayCount: 4,
+      showAll: false,
       cards: [
         {
           id: "Blog",
@@ -106,7 +106,7 @@
         },
         {
           id: "GitHub",
-          icon: "💻",
+          icon: "🐱",
           title: "GitHub",
           description: "什么也不会",
           url: "https://github.com/Huin2479",
@@ -173,6 +173,8 @@
     updateNotifyDelay: config.update.notifyDelay,
     updateSource: config.update.source,
     enableNavigation: config.navigation.enable,
+    navigationMaxDisplayCount: config.navigation.maxDisplayCount || 4,
+    navigationShowAll: config.navigation.showAll || false,
     navigationCards: config.navigation.cards,
     enableNavigationFilters: config.navigation.filters?.enable,
     navigationFilterTags: config.navigation.filters?.tags,
