@@ -1019,7 +1019,8 @@ body::before {
 
   .nav-modal-content {
     max-height: 90vh;
-    max-width: 100vw;
+    max-width: calc(100vw - 2rem);
+    border-radius: calc(var(--radius) * 1.2);
   }
 
   .nav-modal-header {
@@ -1031,27 +1032,54 @@ body::before {
   }
 
   .nav-modal-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.875rem;
+  }
+
+  .nav-modal-toggle {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    min-width: 100px;
   }
 }
 
 @media (max-width: 480px) {
+  .nav-modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .nav-modal-content {
+    max-height: 95vh;
+    max-width: calc(100vw - 1rem);
+    border-radius: var(--radius);
+  }
+
   .nav-modal-header {
-    padding: 1rem;
+    padding: 0.875rem 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
   }
 
   .nav-modal-title {
-    font-size: 1.1rem;
+    font-size: 1rem;
+    margin: 0;
   }
 
   .nav-modal-body {
-    padding: 1rem;
+    padding: 1rem 0.75rem;
   }
 
   .nav-modal-grid {
     grid-template-columns: 1fr;
     gap: 0.75rem;
+  }
+
+  .nav-modal-toggle {
+    align-self: flex-end;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.75rem;
+    min-width: 90px;
   }
 
   .nav-modal-content .nav-card:hover {
@@ -1198,31 +1226,45 @@ body::before {
 
 /* 响应式设计 */
 @media (max-width:600px){
-  .title{letter-spacing:.02em;} 
-  .main{padding:1.6rem 1.1rem;} 
-  .actions{margin-top:.9rem;} 
-  .btn{padding:.55rem .9rem;font-size:.7rem;} 
+  .title{letter-spacing:.02em;}
+  .main{padding:1.6rem 1.1rem;}
+  .actions{margin-top:.9rem;}
+  .btn{padding:.55rem .9rem;font-size:.7rem;}
   .announcement{top:.65rem;padding:.7rem .75rem .75rem;font-size:.66rem;border-radius:16px;}
   .accent-panel{bottom:.75rem;right:.75rem;}
   .toast-container{top:10%;gap:.45rem;}
+
+  /* 导航过滤器 */
   .nav-filter-bar {
     margin: 1.2rem auto 0;
     gap: 0.45rem;
+    max-width: 320px;
   }
   .nav-filter-btn {
     font-size: 0.65rem;
     padding: 0.35rem 0.75rem;
   }
+
+  /* 导航卡片 */
   .nav-cards {
     margin: 1.5rem auto 0;
     gap: 0.8rem;
     flex-direction: column;
     align-items: center;
+    max-width: 340px;
   }
   .nav-card {
     width: 100%;
-    max-width: 300px;
-    min-width: 260px;
+    max-width: 320px;
+    min-width: 280px;
+  }
+
+  /* 查看更多按钮 */
+  .nav-more-btn {
+    margin: 1rem auto 0;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.8rem;
+    min-width: 120px;
   }
 }
 
@@ -1231,6 +1273,23 @@ body::before {
   .subtitle{font-size:clamp(.95rem,4vw,1.15rem);}
   .main{padding:1.1rem .85rem;}
   .actions{gap:.5rem;}
+
+  /* 移动端触摸优化 */
+  .nav-card:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .nav-more-btn:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* 模态框触摸优化 */
+  .nav-modal-content .nav-card:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
 }
 
 /* 移动端背景优化 */
@@ -1272,10 +1331,37 @@ body::before {
   }
 }
 
-/* 中等屏幕优化 */
-@media (min-width: 768px) and (max-width: 1199px) {
+/* 平板端优化 */
+@media (min-width: 601px) and (max-width: 1024px) {
   .nav-cards {
-    max-width: 680px;
+    max-width: 720px;
+    gap: 0.875rem;
+  }
+
+  .nav-modal-content {
+    max-width: 800px;
+  }
+
+  .nav-modal-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+}
+
+/* 大屏优化 */
+@media (min-width: 1025px) {
+  .nav-cards {
+    max-width: 800px;
+    gap: 1.125rem;
+  }
+
+  .nav-modal-content {
+    max-width: 1000px;
+  }
+
+  .nav-modal-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
   }
 }
 /* 通用动画 */
