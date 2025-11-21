@@ -14,7 +14,7 @@
         text: message,
         id: 'protect-' + type,
         variant: 'neutral',
-        duration: 2500
+        duration: 2500,
       });
     }
   }

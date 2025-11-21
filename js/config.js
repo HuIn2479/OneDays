@@ -1,26 +1,26 @@
 (function () {
   const config = {
-    version: "v0.12.8",
+    version: 'v0.12.8',
     meta: {
-      launchDate: "2021-02-27T00:00:00+08:00",
-      title: "忆窝",
-      subtitle: "One Day.",
+      launchDate: '2021-02-27T00:00:00+08:00',
+      title: '忆窝',
+      subtitle: 'One Day.',
     },
     splash: {
       enable: true,
       minDuration: 1000,
       removeIfFast: true,
       skeletonFadeDelay: 120,
-      heading: "忆窝",
-      subheading: "Sakura daydreams are loading…",
+      heading: '忆窝',
+      subheading: 'Sakura daydreams are loading…',
     },
     theme: {
       accents: [
-        "hsl(350 82% 54%)",
-        "hsl(215 85% 55%)",
-        "hsl(135 50% 42%)",
-        "hsl(32 90% 52%)",
-        "hsl(275 70% 60%)",
+        'hsl(350 82% 54%)',
+        'hsl(215 85% 55%)',
+        'hsl(135 50% 42%)',
+        'hsl(32 90% 52%)',
+        'hsl(275 70% 60%)',
       ],
       defaultAccentIndex: 0,
       enableAccentPanel: true,
@@ -44,17 +44,17 @@
     },
     hitokoto: {
       enable: true,
-      provider: "hitokoto", // hitokoto | custom
+      provider: 'hitokoto', // hitokoto | custom
       apis: {
         hitokoto: {
-          url: "https://v1.hitokoto.cn/",
-          categories: ["a", "b", "d", "h"],
-          params: { encode: "json" }
+          url: 'https://v1.hitokoto.cn/',
+          categories: ['a', 'b', 'd', 'h'],
+          params: { encode: 'json' },
         },
         custom: {
-          url: "",
-          params: {}
-        }
+          url: '',
+          params: {},
+        },
       },
       timeout: 8000,
       retries: 2,
@@ -62,18 +62,15 @@
     },
     announcement: {
       enable: true,
-      icon: "😽",
-      messages: [
-        "平安喜樂，萬事勝意，祝你，祝我，祝我們",
-        "ISTP-A | 机械键盘爱好者 | 猫奴",
-      ],
+      icon: '😽',
+      messages: ['平安喜樂，萬事勝意，祝你，祝我，祝我們', 'ISTP-A | 机械键盘爱好者 | 猫奴'],
       cycleInterval: 4800,
       transition: 500,
-      dismissKey: "ann-v4",
+      dismissKey: 'ann-v4',
       closeButton: true,
       remoteFeed: {
         enable: false,
-        source: "/data/announcements.json",
+        source: '/data/announcements.json',
         refreshInterval: 3600000,
       },
     },
@@ -88,7 +85,7 @@
       enable: true,
       checkInterval: 300000,
       notifyDelay: 0,
-      source: "/js/config.js",
+      source: '/js/config.js',
     },
     navigation: {
       enable: true,
@@ -96,27 +93,27 @@
       showAll: false,
       cards: [
         {
-          id: "Blog",
-          icon: "🎯",
-          title: "Rin",
-          description: "平安喜樂，萬事勝意，祝你，祝我，祝我們",
-          url: "https://ns.onedays.top",
-          target: "_self",
-          tags: ["blog", "life"]
+          id: 'Blog',
+          icon: '🎯',
+          title: 'Rin',
+          description: '平安喜樂，萬事勝意，祝你，祝我，祝我們',
+          url: 'https://ns.onedays.top',
+          target: '_self',
+          tags: ['blog', 'life'],
         },
         {
-          id: "GitHub",
-          icon: "🐱",
-          title: "GitHub",
-          description: "什么也不会",
-          url: "https://github.com/Huin2479",
-          target: "_self",
-          tags: ["dev"]
-        }
+          id: 'GitHub',
+          icon: '🐱',
+          title: 'GitHub',
+          description: '什么也不会',
+          url: 'https://github.com/Huin2479',
+          target: '_self',
+          tags: ['dev'],
+        },
       ],
       filters: {
         enable: true,
-        tags: ["blog", "dev", "life"],
+        tags: ['blog', 'dev', 'life'],
       },
     },
     easter: {
@@ -126,8 +123,8 @@
       titleClickThreshold: 7,
       ascii: true,
       confetti: true,
-      catDriftInterval: 12000
-    }
+      catDriftInterval: 12000,
+    },
   };
 
   const flat = {
@@ -138,8 +135,8 @@
     splashMinDuration: config.splash.minDuration,
     removeSplashIfFast: config.splash.removeIfFast,
     skeletonFadeDelay: config.splash.skeletonFadeDelay,
-  splashHeading: config.splash.heading,
-  splashSubheading: config.splash.subheading,
+    splashHeading: config.splash.heading,
+    splashSubheading: config.splash.subheading,
     accents: config.theme.accents,
     defaultAccentIndex: config.theme.defaultAccentIndex,
     enableAccentPanel: config.theme.enableAccentPanel,
