@@ -2,25 +2,22 @@
 /home    / 301
 /index   / 301
 
-# 2) IE 不支持页面
-/ie      /ie.html 200
-
-# 3) 去掉 .html (示例)
+# 2) 去掉 .html (示例)
 # /about.html   /about   301
 # /links.html   /links   301
 
-# 4) 静态资源
+# 3) 静态资源
 /favicon.ico   /image/logo/index.jpg 302
 
-# 5) 维护模式 (启用时放最顶)
+# 4) 维护模式 (启用时放最顶)
 # /*   /error/50x.html 302!
 
-# 6) SPA 前端路由 (如果未来启用, 放在 404 前)
+# 5) SPA 前端路由 (如果未来启用, 放在 404 前)
 # /*   /index.html 200
 
-# 7) 自定义 404 兜底
+# 6) 自定义 404 兜底
 /*    /error/40x.html 404
 
-# 8) 自定义 500 (内部错误备用)
+# 7) 自定义 500 (内部错误备用)
 # /500  /error/50x.html 500
 
