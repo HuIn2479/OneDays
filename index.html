@@ -2,6 +2,12 @@
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
+    <script>
+      /* IE 浏览器检测与跳转 */
+      if (!!window.ActiveXObject || "ActiveXObject" in window) {
+        window.location.href = "/ie.html";
+      }
+    </script>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="robots" content="noindex,nofollow,noarchive" />
     <meta name="theme-color" content="#f33" />
@@ -59,7 +65,11 @@
     </main>
 
     <!-- 开屏动画 -->
-    <div id="splash" class="splash" data-i18n-attr='{"aria-label":"splashLoading"}'></div>
+    <div
+      id="splash"
+      class="splash"
+      data-i18n-attr='{"aria-label":"splashLoading"}'
+    ></div>
 
     <div id="maomao" aria-label="小猫"></div>
 
