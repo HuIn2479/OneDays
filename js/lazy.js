@@ -14,6 +14,11 @@
     else setTimeout(fn, 1200);
   }
 
+  setTimeout(() => {
+    loadScript('/js/announcement.js');
+    loadScript('/js/greeting.js');
+  }, 300);
+
   // 延迟加载 F12 限制与小猫交互
   idle(() => {
     loadScript('/js/maomao.js');

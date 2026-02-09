@@ -96,7 +96,7 @@
           id: 'Blog',
           icon: '🎯',
           title: 'Rin',
-          description: '平安喜樂，萬事勝意，祝你，祝我，祝我們',
+          description: ' 什么时候会更新呢？',
           url: 'https://ns.onedays.top',
           target: '_self',
           tags: ['blog', 'life'],

@@ -1,167 +1,110 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>浏览器不受支持 - 忆窝</title>
     <style>
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family:
-                -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei",
-                sans-serif;
-            background: linear-gradient(to bottom, #f7f9f7 0%, #e8f0e8 100%);
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                "Microsoft YaHei", sans-serif;
+            background-color: #f9f9f9;
+            color: #1f1f23;
+            height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
         }
 
         .card {
-            background: #fff;
+            background: #ffffff;
+            padding: 48px;
             border-radius: 12px;
-            padding: 50px 42px;
-            max-width: 500px;
-            width: 100%;
-            box-shadow:
-                0 1px 3px rgba(0, 0, 0, 0.05),
-                0 10px 40px rgba(120, 150, 120, 0.06);
-            text-align: center;
-            transition: transform 0.2s ease;
-            border: 1px solid rgba(150, 180, 150, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            max-width: 480px;
+            width: 90%;
+            border: 1px solid rgba(0, 0, 0, 0.08);
         }
 
-        .card:hover {
-            transform: translateY(-2px);
-        }
-
-        .icon {
-            font-size: 68px;
-            margin-bottom: 22px;
-            display: inline-block;
-            opacity: 0.9;
-            filter: grayscale(0.2);
-        }
-
-        h1 {
-            font-size: 25px;
+        .title {
+            font-size: 28px;
             font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 16px;
-            letter-spacing: -0.4px;
+            margin: 0 0 8px;
+            color: #1f1f23;
         }
 
-        .description {
+        .subtitle {
+            font-size: 18px;
+            color: #8d9095;
+            margin: 0 0 32px;
+            font-weight: 400;
+        }
+
+        .message {
             font-size: 15px;
-            color: #5a6c7d;
-            line-height: 1.75;
-            margin-bottom: 38px;
+            line-height: 1.6;
+            color: #5a5d62;
+            margin-bottom: 32px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 24px;
+            background-color: #1f1f23;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: opacity 0.2s;
+            margin: 0 4px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
         }
 
         .footer {
-            font-size: 11px;
-            color: #a8b4c0;
-            font-weight: 500;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            position: relative;
-            padding-top: 24px;
-        }
-
-        .footer::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 1px;
-            background: linear-gradient(to right,
-                    transparent,
-                    rgba(150, 180, 150, 0.3),
-                    transparent);
-        }
-
-        @media (max-width: 600px) {
-            .card {
-                padding: 40px 28px;
-            }
-
-            .icon {
-                font-size: 56px;
-            }
-
-            h1 {
-                font-size: 22px;
-            }
-
-            .description {
-                font-size: 14px;
-                margin-bottom: 32px;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .card {
-                padding: 32px 24px;
-            }
-
-            .icon {
-                font-size: 48px;
-            }
-
-            h1 {
-                font-size: 20px;
-            }
+            margin-top: 40px;
+            font-size: 13px;
+            color: #8d9095;
         }
     </style>
 </head>
 
 <body>
     <div class="card">
-        <div class="icon">⚠️</div>
-        <h1>浏览器不受支持</h1>
-        <p class="description">
-            您正在使用的 Internet Explorer
-            浏览器已过时，无法提供安全可靠的浏览体验。<br />
-            请使用现代浏览器访问本站以获得最佳体验。
+        <h1 class="title">忆窝</h1>
+        <h2 class="subtitle">One Day.</h2>
+
+        <p class="message">
+            很抱歉，您的浏览器（Internet Explorer）已不再受支持。<br />
+            为了获得更佳的浏览体验与安全性，建议更换现代浏览器。
         </p>
-        <div class="footer">One Day.</div>
+
+        <div>
+            <a href="https://www.microsoft.com/edge" class="btn">Edge</a>
+            <a href="https://www.google.cn/chrome/" class="btn">Chrome</a>
+        </div>
     </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 〇Enshō🌸</p>
+    </footer>
 
     <script>
         (function () {
             var lang = navigator.language || navigator.userLanguage || "en";
-            var isZh = lang.toLowerCase().indexOf("zh") !== -1;
-
-            var content = {
-                zh: {
-                    title: "浏览器不受支持 - 忆窝",
-                    heading: "浏览器不受支持",
-                    description:
-                        "您正在使用的 Internet Explorer 浏览器已过时，无法提供安全可靠的浏览体验。<br>请使用现代浏览器访问本站以获得最佳体验。",
-                },
-                en: {
-                    title: "Browser Not Supported - OneDays",
-                    heading: "Browser Not Supported",
-                    description:
-                        "You are using an outdated Internet Explorer browser that cannot provide a secure browsing experience.<br>Please use a modern browser to access this site.",
-                },
-            };
-
-            var text = isZh ? content.zh : content.en;
-            document.title = text.title;
-            document.querySelector("h1").innerHTML = text.heading;
-            document.querySelector(".description").innerHTML = text.description;
-            document.documentElement.lang = isZh ? "zh-CN" : "en";
+            if (lang.toLowerCase().indexOf("zh") === -1) {
+                document.title = "Browser Not Supported - OneDays";
+                document.querySelector(".message").innerHTML =
+                    "Sorry, your browser (Internet Explorer) is no longer supported.<br>For better experience and security, please use a modern browser.";
+                document.documentElement.lang = "en";
+            }
         })();
     </script>
 </body>

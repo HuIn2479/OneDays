@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <script>
-      /* IE 浏览器检测与跳转 */
       if (!!window.ActiveXObject || "ActiveXObject" in window) {
         window.location.href = "/ie.html";
       }
@@ -12,15 +11,14 @@
     <meta name="robots" content="noindex,nofollow,noarchive" />
     <meta name="theme-color" content="#f33" />
     <title>OneDay'S Home</title>
-    <!-- 站点图标 -->
     <link rel="icon" href="/image/logo/index.jpg" />
     <link rel="apple-touch-icon" href="/image/logo/index.jpg" />
-    <!-- 预加载与性能优化 -->
     <link rel="preload" href="/css/index.css" as="style" />
     <link rel="stylesheet" href="/css/index.css" />
     <link rel="stylesheet" href="/css/warmth.css" />
     <link rel="preconnect" href="https://v1.hitokoto.cn" crossorigin />
     <link rel="stylesheet" href="/css/maomao.css" />
+    <link rel="stylesheet" href="/css/couplet.css" />
     <script src="/js/i18n.js"></script>
   </head>
 
@@ -60,12 +58,9 @@
             🌓
           </button>
         </div>
-        <!-- 导航卡片容器 -->
         <div id="navCards" class="nav-cards skeleton" hidden></div>
       </div>
     </main>
-
-    <!-- 开屏动画 -->
     <div
       id="splash"
       class="splash"
@@ -87,16 +82,13 @@
         >
       </div>
     </footer>
-
-    <!-- 核心脚本 + 其余模块 -->
     <script src="/js/config.js" defer></script>
-    <script src="/js/navigation.js" defer></script>
     <script src="/js/core.js" defer></script>
-    <script src="/js/announcement.js" defer></script>
     <script src="/js/theme.js" defer></script>
+    <script src="/js/navigation.js" defer></script>
     <script src="/js/loader.js" defer></script>
     <script src="/js/app-init.js" defer></script>
-    <script src="/js/greeting.js" defer></script>
+    <script src="/js/couplet.js" defer></script>
     <script src="/js/lazy.js" defer></script>
 
     <!-- 主题切换遮罩 -->
