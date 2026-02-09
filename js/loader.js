@@ -178,7 +178,7 @@
   // 获取随机字符
   function getRandomChar() {
     const chars =
-      '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+      'CRYCHICは壊れてしまいましたわ';
     return chars[Math.floor(Math.random() * chars.length)];
   }
 

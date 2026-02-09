@@ -1,6 +1,6 @@
 (function () {
   const config = {
-    version: 'v0.12.8',
+    version: 'v0.14.0',
     meta: {
       launchDate: '2021-02-27T00:00:00+08:00',
       title: '忆窝',
@@ -37,7 +37,7 @@
       },
     },
     effects: {
-      enableScrollProgress: true, // 启用滚动进度
+      enableScrollProgress: false, // 启用滚动进度
     },
     runtime: {
       enable: true, // 启用运行时间显示

@@ -108,7 +108,7 @@
   }
 
   function bindConfetti() {
-    if (!cfg.enableConfetti || reducedMotion) return; // 尊重减少动画 & 低功耗
+    if (!cfg.enableConfetti || reducedMotion) return;
     const cat = document.getElementById('maomao');
     if (!cat || cat.dataset.confettiBound) return;
     cat.dataset.confettiBound = '1';

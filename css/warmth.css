@@ -1,0 +1,75 @@
+.greeting-text {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--fg-mute);
+  letter-spacing: 0.03em;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.greeting-text.visible {
+  opacity: 0.7;
+}
+
+#hitokoto_text {
+  transition: color 0.25s ease;
+}
+
+#hitokoto_text:hover {
+  color: var(--accent);
+}
+
+.runtime {
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm, 8px);
+  background: var(--bg-alt);
+  transition: background 0.25s ease;
+}
+
+.runtime:hover {
+  background: color-mix(in srgb, var(--bg-glow) 20%, var(--bg-alt));
+}
+
+.skeleton {
+  animation: skeleton-fade 1.5s ease-in-out infinite;
+  background: var(--bg-alt);
+}
+
+@keyframes skeleton-fade {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+#themeToggle {
+  transition: transform 0.2s ease;
+}
+
+#themeToggle:hover {
+  transform: scale(1.05);
+}
+
+#themeToggle:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 600px) {
+  .greeting-text {
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
