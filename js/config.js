@@ -1,6 +1,6 @@
 (function () {
   const config = {
-    version: 'v0.14.0',
+    version: 'v0.14.5',
     meta: {
       launchDate: '2021-02-27T00:00:00+08:00',
       title: '忆窝',
@@ -97,7 +97,7 @@
           icon: '🎯',
           title: 'Rin',
           description: ' 什么时候会更新呢？',
-          url: 'https://ns.onedays.top',
+          url: 'https://n.eki.ink',
           target: '_self',
           tags: ['blog', 'life'],
         },
