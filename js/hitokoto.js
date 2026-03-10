@@ -3,27 +3,27 @@
 
   // 检查是否启用一言功能
   if (cfg.enableHitokoto === false) {
-    const hitokoto = document.getElementById('hitokoto');
+    const hitokoto = document.getElementById("hitokoto");
     if (hitokoto) hitokoto.remove();
     return;
   }
 
   // 获取翻译函数
-  const t = window.__I18N__?.t || (k => k);
+  const t = window.__I18N__?.t || ((k) => k);
 
   // 配置选项（从全局配置获取，带默认值作为后备）
   const config = {
-    provider: cfg.hitokotoProvider || 'hitokoto',
+    provider: cfg.hitokotoProvider || "hitokoto",
     apis: cfg.hitokotoApis || {
       hitokoto: {
-        url: 'https://v1.hitokoto.cn/',
-        categories: ['a', 'b', 'd', 'h'],
-        params: { encode: 'json' },
+        url: "https://v1.hitokoto.cn/",
+        categories: ["a", "b", "d", "h"],
+        params: { encode: "json" },
       },
     },
     timeout: cfg.hitokotoTimeout || 8000,
     retries: cfg.hitokotoRetries || 2,
-    cacheKey: 'hitokoto-cache',
+    cacheKey: "hitokoto-cache",
     cacheExpiry: cfg.hitokotoCacheTime || 300000,
     skeletonDelay: cfg.skeletonFadeDelay || 120,
   };
@@ -35,18 +35,20 @@
       buildUrl(apiConfig) {
         const params = new URLSearchParams(apiConfig.params || {});
         if (apiConfig.categories) {
-          apiConfig.categories.forEach(cat => params.append('c', cat));
+          apiConfig.categories.forEach((cat) => params.append("c", cat));
         }
-        return apiConfig.url + (params.toString() ? '?' + params.toString() : '');
+        return (
+          apiConfig.url + (params.toString() ? "?" + params.toString() : "")
+        );
       },
 
       parseResponse(data) {
-        if (!data.hitokoto) throw new Error('Invalid hitokoto response');
+        if (!data.hitokoto) throw new Error("Invalid hitokoto response");
         const { hitokoto, from, from_who, uuid } = data;
         return {
-          content: hitokoto + (from ? ` — 「${from_who || from}」` : ''),
+          content: hitokoto + (from ? ` — 「${from_who || from}」` : ""),
           url: uuid ? `https://hitokoto.cn/?uuid=${uuid}` : null,
-          source: from_who || from || '佚名',
+          source: from_who || from || "佚名",
         };
       },
     },
@@ -54,30 +56,33 @@
     // 自定义 API 适配器
     custom: {
       buildUrl(apiConfig) {
-        if (!apiConfig.url) throw new Error('Custom API URL not configured');
+        if (!apiConfig.url) throw new Error("Custom API URL not configured");
         const params = new URLSearchParams(apiConfig.params || {});
-        return apiConfig.url + (params.toString() ? '?' + params.toString() : '');
+        return (
+          apiConfig.url + (params.toString() ? "?" + params.toString() : "")
+        );
       },
 
       parseResponse(data) {
         // 尝试多种可能的响应格式
-        let content = data.content || data.hitokoto || data.text || data.sentence;
+        let content =
+          data.content || data.hitokoto || data.text || data.sentence;
         let source = data.author || data.from || data.from_who || data.source;
         let url = data.url || data.link;
 
-        if (!content) throw new Error('Invalid custom API response');
+        if (!content) throw new Error("Invalid custom API response");
 
         return {
-          content: content + (source ? ` — 「${source}」` : ''),
+          content: content + (source ? ` — 「${source}」` : ""),
           url: url || null,
-          source: source || '佚名',
+          source: source || "佚名",
         };
       },
     },
   };
 
-  const link = document.getElementById('hitokoto_text');
-  const container = document.getElementById('hitokoto');
+  const link = document.getElementById("hitokoto_text");
+  const container = document.getElementById("hitokoto");
 
   if (!link || !container) return;
 
@@ -93,7 +98,9 @@
 
   const currentApiConfig = config.apis[config.provider];
   if (!currentApiConfig) {
-    console.error(`[Hitokoto] API config not found for provider: ${config.provider}`);
+    console.error(
+      `[Hitokoto] API config not found for provider: ${config.provider}`,
+    );
     return;
   }
 
@@ -120,7 +127,7 @@
           JSON.stringify({
             content,
             timestamp: Date.now(),
-          })
+          }),
         );
       } catch (e) {
         // 忽略存储错误
@@ -130,9 +137,9 @@
 
   // 移除骨架样式的统一方法
   function removeSkeleton(delay = config.skeletonDelay) {
-    if (container.classList.contains('skeleton')) {
+    if (container.classList.contains("skeleton")) {
       setTimeout(() => {
-        container.classList.remove('skeleton');
+        container.classList.remove("skeleton");
       }, delay);
     }
   }
@@ -142,17 +149,17 @@
     link.textContent = content;
     if (url) {
       link.href = url;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
     } else {
-      link.removeAttribute('href');
-      link.removeAttribute('target');
+      link.removeAttribute("href");
+      link.removeAttribute("target");
     }
 
     if (isError) {
-      link.style.color = 'var(--fg-mute, #999)';
+      link.style.color = "var(--fg-mute, #999)";
     } else {
-      link.style.color = '';
+      link.style.color = "";
     }
 
     removeSkeleton();
@@ -167,10 +174,10 @@
       const apiUrl = currentAdapter.buildUrl(currentApiConfig);
 
       const response = await fetch(apiUrl, {
-        mode: 'cors',
+        mode: "cors",
         signal: controller.signal,
         headers: {
-          Accept: 'application/json',
+          Accept: "application/json",
         },
       });
 
@@ -191,14 +198,14 @@
       clearTimeout(timeoutId);
 
       // 如果是中止错误，说明是超时
-      if (error.name === 'AbortError') {
-        throw new Error('Request timeout');
+      if (error.name === "AbortError") {
+        throw new Error("Request timeout");
       }
 
       // 重试逻辑
       if (attempt < config.retries) {
         const delay = Math.min(1000 * Math.pow(2, attempt), 5000); // 指数退避，最大5秒
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
         return fetchHitokoto(attempt + 1);
       }
 
@@ -220,16 +227,22 @@
       const result = await fetchHitokoto();
       setHitokoto(result.content, result.url);
     } catch (error) {
-      console.warn(`[Hitokoto] Failed to load from ${config.provider}:`, error.message);
+      console.warn(
+        `[Hitokoto] Failed to load from ${config.provider}:`,
+        error.message,
+      );
 
       // 根据错误类型显示不同的错误信息
       let errorMessage;
-      if (error.message.includes('timeout')) {
-        errorMessage = t('hitokotoTimeout') || '一言加载超时';
-      } else if (error.message.includes('network') || error.message.includes('fetch')) {
-        errorMessage = t('hitokotoNetwork') || '网络连接失败';
+      if (error.message.includes("timeout")) {
+        errorMessage = t("hitokotoTimeout") || "一言加载超时";
+      } else if (
+        error.message.includes("network") ||
+        error.message.includes("fetch")
+      ) {
+        errorMessage = t("hitokotoNetwork") || "网络连接失败";
       } else {
-        errorMessage = t('hitokotoError') || '获取一言失败 (离线?)';
+        errorMessage = t("hitokotoError") || "获取一言失败 (离线?)";
       }
 
       setHitokoto(errorMessage, null, true);

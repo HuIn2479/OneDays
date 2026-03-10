@@ -1,25 +1,27 @@
 (() => {
   const cfg = window.__APP_CONFIG__ || {};
   if (!cfg.enableSplash) {
-    const splashEl = document.getElementById('splash');
+    const splashEl = document.getElementById("splash");
     splashEl && splashEl.remove();
     return;
   }
 
-  const splash = document.getElementById('splash');
+  const splash = document.getElementById("splash");
   if (!splash) return;
 
   ensureSplashStructure(splash, cfg);
 
-  const bar = splash.querySelector('.splash-matrix-progress-fill');
-  const title = splash.querySelector('.splash-matrix-progress-text');
+  const bar = splash.querySelector(".splash-matrix-progress-fill");
+  const title = splash.querySelector(".splash-matrix-progress-text");
 
   // 获取所有需要加载的资源
   const resources = [
-    ...document.querySelectorAll('link[rel="stylesheet"], link[rel="manifest"], script[defer]'),
-  ].filter(el => el.src || el.href);
+    ...document.querySelectorAll(
+      'link[rel="stylesheet"], link[rel="manifest"], script[defer]',
+    ),
+  ].filter((el) => el.src || el.href);
 
-  const urls = [...new Set(resources.map(r => r.src || r.href))];
+  const urls = [...new Set(resources.map((r) => r.src || r.href))];
   const total = urls.length || 1;
   let loaded = 0;
 
@@ -28,25 +30,28 @@
     const percent = Math.round((loaded / total) * 100);
     requestAnimationFrame(() => {
       if (bar) {
-        bar.style.width = percent + '%';
+        bar.style.width = percent + "%";
       }
       if (title) {
-        title.textContent = percent < 100 ? 'Loading ' + percent + '%' : 'Ready';
+        title.textContent =
+          percent < 100 ? "Loading " + percent + "%" : "Ready";
       }
     });
   };
 
   updateProgress();
 
-  urls.forEach(url => {
+  urls.forEach((url) => {
     // 如果资源已在performance中标记为已加载
-    if (performance.getEntriesByName(url).some(entry => entry.initiatorType)) {
+    if (
+      performance.getEntriesByName(url).some((entry) => entry.initiatorType)
+    ) {
       loaded++;
       updateProgress();
       return;
     }
 
-    const element = resources.find(r => (r.src || r.href) === url);
+    const element = resources.find((r) => (r.src || r.href) === url);
     if (!element) {
       loaded++;
       updateProgress();
@@ -66,77 +71,80 @@
     };
 
     const cleanup = () => {
-      element.removeEventListener('load', onLoad);
-      element.removeEventListener('error', onError);
+      element.removeEventListener("load", onLoad);
+      element.removeEventListener("error", onError);
     };
 
-    element.addEventListener('load', onLoad);
-    element.addEventListener('error', onError);
+    element.addEventListener("load", onLoad);
+    element.addEventListener("error", onError);
   });
 
   // 监听进度条完成
   const progressObserver = new MutationObserver(() => {
-    if (bar && bar.style.width === '100%') {
+    if (bar && bar.style.width === "100%") {
       progressObserver.disconnect();
     }
   });
 
   if (bar) {
-    progressObserver.observe(bar, { attributes: true, attributeFilter: ['style'] });
+    progressObserver.observe(bar, {
+      attributes: true,
+      attributeFilter: ["style"],
+    });
     // 安全超时：30秒后强制断开
     setTimeout(() => progressObserver.disconnect(), 30000);
   }
 
   function ensureSplashStructure(root, config) {
-    if (root.dataset.enhanced === 'true') return;
+    if (root.dataset.enhanced === "true") return;
 
-    root.innerHTML = '';
+    root.innerHTML = "";
 
     // 创建主容器
-    const container = document.createElement('div');
-    container.className = 'splash-matrix';
+    const container = document.createElement("div");
+    container.className = "splash-matrix";
 
     // 创建标题区域
-    const header = document.createElement('div');
-    header.className = 'splash-matrix-header';
+    const header = document.createElement("div");
+    header.className = "splash-matrix-header";
 
-    const title = document.createElement('div');
-    title.className = 'splash-matrix-title';
+    const title = document.createElement("div");
+    title.className = "splash-matrix-title";
     const titleText =
       config.splashHeading ||
       config.splash?.heading ||
       config.meta?.title ||
       config.title ||
-      '忆窝';
+      "忆窝";
     title.textContent = titleText;
 
-    const subtitle = document.createElement('div');
-    subtitle.className = 'splash-matrix-subtitle';
+    const subtitle = document.createElement("div");
+    subtitle.className = "splash-matrix-subtitle";
     const subtitleText =
       config.splashSubheading ||
       config.splash?.subheading ||
       config.meta?.subtitle ||
-      'Digital dreams are loading…';
+      "Digital dreams are loading…";
     subtitle.textContent = subtitleText;
 
     header.appendChild(title);
     header.appendChild(subtitle);
 
     // 创建矩阵雨容器
-    const rain = document.createElement('div');
-    rain.className = 'splash-matrix-rain';
+    const rain = document.createElement("div");
+    rain.className = "splash-matrix-rain";
 
     // 创建多个雨滴列
     for (let i = 0; i < 15; i++) {
-      const column = document.createElement('div');
-      column.className = 'splash-matrix-column';
+      const column = document.createElement("div");
+      column.className = "splash-matrix-column";
       column.style.left = `${(i / 15) * 100}%`;
       column.style.animationDelay = `${Math.random() * 2}s`;
 
       // 每个列包含多个字符
       for (let j = 0; j < 20; j++) {
-        const char = document.createElement('span');
-        char.className = 'splash-matrix-char';
+        const char = document.createElement("span");
+        char.className = "splash-matrix-char";
         char.textContent = getRandomChar();
         char.style.animationDelay = `${j * 0.1 + Math.random() * 0.5}s`;
         column.appendChild(char);
@@ -146,18 +154,18 @@
     }
 
     // 创建进度区域
-    const progress = document.createElement('div');
-    progress.className = 'splash-matrix-progress';
+    const progress = document.createElement("div");
+    progress.className = "splash-matrix-progress";
 
-    const progressText = document.createElement('div');
-    progressText.className = 'splash-matrix-progress-text';
-    progressText.dataset.i18n = 'loadingProgress';
-    progressText.textContent = 'Loading...';
+    const progressText = document.createElement("div");
+    progressText.className = "splash-matrix-progress-text";
+    progressText.dataset.i18n = "loadingProgress";
+    progressText.textContent = "Loading...";
 
-    const progressBar = document.createElement('div');
-    progressBar.className = 'splash-matrix-progress-bar';
-    const progressFill = document.createElement('div');
-    progressFill.className = 'splash-matrix-progress-fill';
+    const progressBar = document.createElement("div");
+    progressBar.className = "splash-matrix-progress-bar";
+    const progressFill = document.createElement("div");
+    progressFill.className = "splash-matrix-progress-fill";
     progressBar.appendChild(progressFill);
 
     progress.appendChild(progressText);
@@ -169,7 +177,7 @@
     container.appendChild(progress);
 
     root.appendChild(container);
-    root.dataset.enhanced = 'true';
+    root.dataset.enhanced = "true";
 
     // 启动字符更新动画
     startCharAnimation(container);
@@ -177,20 +185,19 @@
 
   // 获取随机字符
   function getRandomChar() {
-    const chars =
-      'CRYCHICは壊れてしまいましたわ';
+    const chars = "CRYCHICは壊れてしまいましたわ";
     return chars[Math.floor(Math.random() * chars.length)];
   }
 
   // 启动字符动画
   function startCharAnimation(container) {
-    const chars = container.querySelectorAll('.splash-matrix-char');
+    const chars = container.querySelectorAll(".splash-matrix-char");
     let interval;
     let observer;
     let timeout;
 
     const updateChars = () => {
-      chars.forEach(char => {
+      chars.forEach((char) => {
         if (Math.random() < 0.02) {
           // 2% 概率更新
           char.textContent = getRandomChar();
@@ -219,7 +226,7 @@
 
     // 当开屏消失时清理
     observer = new MutationObserver(() => {
-      if (container.closest('.splash.fade-out')) {
+      if (container.closest(".splash.fade-out")) {
         cleanup();
       }
     });
@@ -227,7 +234,7 @@
     if (container.parentElement) {
       observer.observe(container.parentElement, {
         attributes: true,
-        attributeFilter: ['class'],
+        attributeFilter: ["class"],
       });
     }
 
@@ -239,10 +246,10 @@
   }
 
   // 页面卸载时清理所有资源
-  window.addEventListener('beforeunload', () => {
-    const splash = document.getElementById('splash');
+  window.addEventListener("beforeunload", () => {
+    const splash = document.getElementById("splash");
     if (splash) {
-      const container = splash.querySelector('.splash-matrix');
+      const container = splash.querySelector(".splash-matrix");
       if (container && container._cleanupAnimation) {
         container._cleanupAnimation();
       }

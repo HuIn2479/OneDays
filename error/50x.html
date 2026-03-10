@@ -17,7 +17,7 @@
         --radius: 18px;
         --border: rgba(0 0 0 / 0.08);
       }
-      [data-theme='dark'] {
+      [data-theme="dark"] {
         --bg: #0e1114;
         --bg-alt: #161a1e;
         --fg: #e6e7eb;
@@ -35,14 +35,19 @@
           15px/1.55 system-ui,
           -apple-system,
           BlinkMacSystemFont,
-          'Segoe UI',
+          "Segoe UI",
           Roboto,
           Helvetica,
           Arial,
-          'PingFang SC',
-          'Microsoft YaHei',
+          "PingFang SC",
+          "Microsoft YaHei",
           sans-serif;
-        background: radial-gradient(circle at 32% 28%, var(--bg-alt), var(--bg) 70%) fixed;
+        background: radial-gradient(
+            circle at 32% 28%,
+            var(--bg-alt),
+            var(--bg) 70%
+          )
+          fixed;
         min-height: 100vh;
         display: flex;
         align-items: center;
@@ -72,7 +77,12 @@
         inset: 0;
         padding: 1px;
         border-radius: inherit;
-        background: linear-gradient(140deg, var(--accent) 0%, transparent 55%, var(--accent) 100%);
+        background: linear-gradient(
+          140deg,
+          var(--accent) 0%,
+          transparent 55%,
+          var(--accent) 100%
+        );
         mask:
           linear-gradient(#000, #000) content-box,
           linear-gradient(#000, #000);
@@ -88,8 +98,16 @@
         position: absolute;
         inset: 0;
         background:
-          radial-gradient(circle at 22% 22%, var(--accent-soft) 0 150px, transparent 70%),
-          radial-gradient(circle at 80% 75%, var(--accent-soft) 0 130px, transparent 70%);
+          radial-gradient(
+            circle at 22% 22%,
+            var(--accent-soft) 0 150px,
+            transparent 70%
+          ),
+          radial-gradient(
+            circle at 80% 75%,
+            var(--accent-soft) 0 130px,
+            transparent 70%
+          );
         mix-blend-mode: overlay;
         pointer-events: none;
       }
@@ -198,41 +216,50 @@
       /* 同步主站主题 & Accent */
       (function () {
         const ACCENTS = [
-          'hsl(350 82% 54%)',
-          'hsl(215 85% 55%)',
-          'hsl(135 50% 42%)',
-          'hsl(32 90% 52%)',
-          'hsl(275 70% 60%)',
+          "hsl(350 82% 54%)",
+          "hsl(215 85% 55%)",
+          "hsl(135 50% 42%)",
+          "hsl(32 90% 52%)",
+          "hsl(275 70% 60%)",
         ]; // 与 config.js 保持一致
-        const ACC_KEY = 'onedays-accent';
-        const THEME_KEY = 'onedays-theme';
+        const ACC_KEY = "onedays-accent";
+        const THEME_KEY = "onedays-theme";
         const root = document.documentElement;
         function pickAccent() {
-          let idx = parseInt(localStorage.getItem(ACC_KEY) || '0', 10);
+          let idx = parseInt(localStorage.getItem(ACC_KEY) || "0", 10);
           if (isNaN(idx) || idx < 0 || idx >= ACCENTS.length) idx = 0;
           return ACCENTS[idx];
         }
         function setAccent(ac) {
-          root.style.setProperty('--accent', ac);
+          root.style.setProperty("--accent", ac);
           const m = ac.match(/hsl\((\d+)[^%]* (\d+%)[^%]* (\d+)%\)/);
           if (m) {
             let l = parseInt(m[3], 10);
             l = Math.max(0, l - 7);
-            root.style.setProperty('--accent-hover', ac.replace(/(\d+%)\)/, l + '%)'));
+            root.style.setProperty(
+              "--accent-hover",
+              ac.replace(/(\d+%)\)/, l + "%)"),
+            );
           }
         }
         function applyTheme() {
-          let t = localStorage.getItem(THEME_KEY) || 'auto';
-          if (t === 'auto')
-            t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-          if (t === 'dark') root.setAttribute('data-theme', 'dark');
-          else root.removeAttribute('data-theme');
+          let t = localStorage.getItem(THEME_KEY) || "auto";
+          if (t === "auto")
+            t = matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+          if (t === "dark") root.setAttribute("data-theme", "dark");
+          else root.removeAttribute("data-theme");
         }
         setAccent(pickAccent());
         applyTheme();
-        matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-          if ((localStorage.getItem(THEME_KEY) || 'auto') === 'auto') applyTheme();
-        });
+        matchMedia("(prefers-color-scheme: dark)").addEventListener(
+          "change",
+          (e) => {
+            if ((localStorage.getItem(THEME_KEY) || "auto") === "auto")
+              applyTheme();
+          },
+        );
       })();
     </script>
   </head>
@@ -253,10 +280,12 @@
     <script>
       (function () {
         const d = new Date();
-        const pad = n => String(n).padStart(2, '0');
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        const pad = (n) => String(n).padStart(2, "0");
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
         const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-        document.getElementById('ts').textContent = tz ? local + ' ' + tz : local;
+        document.getElementById("ts").textContent = tz
+          ? local + " " + tz
+          : local;
       })();
     </script>
   </body>

@@ -1,27 +1,27 @@
 (function () {
   const cfg = window.__APP_CONFIG__ || {};
 
-  const box = document.getElementById('announcement');
+  const box = document.getElementById("announcement");
   if (!box) return;
 
   if (cfg.enableAnnouncement === false) {
     box.remove();
     delete window.__ANN_PENDING;
     delete window.__announceAdd;
-    console.log('[Announcement] 公告系统已禁用，清理完成');
+    console.log("[Announcement] 公告系统已禁用，清理完成");
     return;
   }
 
-  const host = box.querySelector('.ann-text');
-  const iconEl = box.querySelector('.ann-icon');
-  const closeBtn = box.querySelector('.ann-close');
+  const host = box.querySelector(".ann-text");
+  const iconEl = box.querySelector(".ann-icon");
+  const closeBtn = box.querySelector(".ann-close");
 
   if (!host) {
-    console.warn('[Announcement] 找不到文本容器 .ann-text');
+    console.warn("[Announcement] 找不到文本容器 .ann-text");
     return;
   }
 
-  const storeKey = cfg.announcementDismissKey || 'ann-card-v1';
+  const storeKey = cfg.announcementDismissKey || "ann-card-v1";
   if (localStorage.getItem(storeKey)) {
     window.__announceRestore = () => {
       localStorage.removeItem(storeKey);
@@ -31,7 +31,7 @@
     return;
   }
 
-  if (iconEl) iconEl.textContent = cfg.announcementIcon || '📢';
+  if (iconEl) iconEl.textContent = cfg.announcementIcon || "📢";
 
   const cycle = Math.max(2000, cfg.announcementCycleInterval || 4800);
   const transition = Math.min(cycle - 600, cfg.announcementTransition || 500);
@@ -40,7 +40,7 @@
     items: [],
     index: 0,
     panes: [],
-    mode: 'single',
+    mode: "single",
     rotateTimer: null,
     remoteTimer: null,
     stack: null,
@@ -49,15 +49,16 @@
 
   function makeKey(msg) {
     if (msg == null) return null;
-    if (typeof msg === 'string') return msg;
-    if (typeof msg.text === 'string') return msg.text;
+    if (typeof msg === "string") return msg;
+    if (typeof msg.text === "string") return msg.text;
     return JSON.stringify(msg);
   }
 
   function normalizeMessage(msg) {
     if (!msg) return null;
-    if (typeof msg === 'string') return { text: msg };
-    if (typeof msg === 'object' && typeof msg.text === 'string') return { ...msg };
+    if (typeof msg === "string") return { text: msg };
+    if (typeof msg === "object" && typeof msg.text === "string")
+      return { ...msg };
     return null;
   }
 
@@ -76,7 +77,7 @@
 
     if (!normalized.length) return;
 
-    if (opts.priority === 'front') {
+    if (opts.priority === "front") {
       state.items = normalized.concat(state.items);
       state.index = 0;
     } else {
@@ -87,7 +88,7 @@
   }
 
   function getText(msg) {
-    return msg && typeof msg.text === 'string' ? msg.text : '';
+    return msg && typeof msg.text === "string" ? msg.text : "";
   }
 
   function stopRotation() {
@@ -106,7 +107,7 @@
 
   function showSingleMessage(msg) {
     stopRotation();
-    state.mode = 'single';
+    state.mode = "single";
     state.panes = [];
     if (state.stack) {
       state.stack.remove();
@@ -116,27 +117,28 @@
   }
 
   function ensureCarouselStructure() {
-    if (state.mode === 'carousel' && state.stack && state.panes.length === 2) return;
+    if (state.mode === "carousel" && state.stack && state.panes.length === 2)
+      return;
 
     stopRotation();
-    host.innerHTML = '';
+    host.innerHTML = "";
 
-    const stack = document.createElement('div');
-    stack.className = 'ann-stack';
-    const paneA = document.createElement('span');
-    paneA.className = 'ann-pane active';
-    const paneB = document.createElement('span');
-    paneB.className = 'ann-pane';
+    const stack = document.createElement("div");
+    stack.className = "ann-stack";
+    const paneA = document.createElement("span");
+    paneA.className = "ann-pane active";
+    const paneB = document.createElement("span");
+    paneB.className = "ann-pane";
     stack.appendChild(paneA);
     stack.appendChild(paneB);
     host.appendChild(stack);
 
     state.stack = stack;
     state.panes = [paneA, paneB];
-    state.mode = 'carousel';
+    state.mode = "carousel";
 
     requestAnimationFrame(() => {
-      stack.style.height = paneA.offsetHeight + 'px';
+      stack.style.height = paneA.offsetHeight + "px";
     });
   }
 
@@ -159,12 +161,12 @@
     const [currentPane, nextPane] = state.panes;
     const currentMsg = state.items[state.index % state.items.length];
     currentPane.textContent = getText(currentMsg);
-    currentPane.classList.add('active');
-    nextPane.classList.remove('active');
+    currentPane.classList.add("active");
+    nextPane.classList.remove("active");
     state.index = (state.index + 1) % state.items.length;
 
     requestAnimationFrame(() => {
-      state.stack.style.height = currentPane.offsetHeight + 'px';
+      state.stack.style.height = currentPane.offsetHeight + "px";
     });
 
     scheduleNextFlip();
@@ -176,7 +178,7 @@
   }
 
   function flipPane() {
-    if (state.mode !== 'carousel' || state.panes.length !== 2) return;
+    if (state.mode !== "carousel" || state.panes.length !== 2) return;
     if (state.items.length <= 1) {
       ensureRendering();
       return;
@@ -190,14 +192,14 @@
 
     requestAnimationFrame(() => {
       const newHeight = nextPane.offsetHeight;
-      state.stack.style.height = newHeight + 'px';
+      state.stack.style.height = newHeight + "px";
 
-      currentPane.classList.remove('active');
-      nextPane.classList.add('active');
+      currentPane.classList.remove("active");
+      nextPane.classList.add("active");
 
-      const duration = transition + 'ms';
-      currentPane.style.setProperty('--ann-trans', duration);
-      nextPane.style.setProperty('--ann-trans', duration);
+      const duration = transition + "ms";
+      currentPane.style.setProperty("--ann-trans", duration);
+      nextPane.style.setProperty("--ann-trans", duration);
     });
 
     state.panes.reverse();
@@ -220,17 +222,19 @@
     const refresh = Math.max(60000, cfg.announcementRemoteRefresh || 3600000);
 
     const doFetch = () => {
-      fetch(source, { cache: 'no-store' })
-        .then(res => (res.ok ? res.json() : Promise.reject(new Error(res.statusText))))
-        .then(data => {
+      fetch(source, { cache: "no-store" })
+        .then((res) =>
+          res.ok ? res.json() : Promise.reject(new Error(res.statusText)),
+        )
+        .then((data) => {
           if (Array.isArray(data)) {
             registerMessages(data);
           } else if (data && Array.isArray(data.messages)) {
             registerMessages(data.messages);
           }
         })
-        .catch(err => {
-          console.warn('[Announcement] 远程公告获取失败:', err);
+        .catch((err) => {
+          console.warn("[Announcement] 远程公告获取失败:", err);
         })
         .finally(() => {
           state.remoteTimer = window.setTimeout(doFetch, refresh);
@@ -244,7 +248,7 @@
     stopRotation();
     stopRemote();
     delete window.__announceAdd;
-    box.classList.add('ann-hide');
+    box.classList.add("ann-hide");
     setTimeout(() => {
       if (box.parentNode) {
         box.remove();
@@ -254,9 +258,9 @@
 
   if (cfg.enableAnnouncementClose && closeBtn) {
     closeBtn.hidden = false;
-    closeBtn.addEventListener('click', () => {
+    closeBtn.addEventListener("click", () => {
       try {
-        localStorage.setItem(storeKey, '1');
+        localStorage.setItem(storeKey, "1");
       } catch (_) {
         /* ignore */
       }
@@ -264,12 +268,15 @@
     });
   }
 
-  box.classList.add('announcement-card');
+  box.classList.add("announcement-card");
   box.hidden = false;
 
-  registerMessages(Array.isArray(window.__ANN_PENDING) ? window.__ANN_PENDING.splice(0) : [], {
-    priority: 'front',
-  });
+  registerMessages(
+    Array.isArray(window.__ANN_PENDING) ? window.__ANN_PENDING.splice(0) : [],
+    {
+      priority: "front",
+    },
+  );
   registerMessages((cfg.announcementMessages || []).filter(Boolean));
 
   if (!state.items.length) {
@@ -280,8 +287,8 @@
   ensureRendering();
 
   window.__announceAdd = (msg, opts) => {
-    if (!box || !box.parentNode || box.classList.contains('ann-hide')) {
-      console.warn('[Announcement] 公告已关闭，无法添加新消息');
+    if (!box || !box.parentNode || box.classList.contains("ann-hide")) {
+      console.warn("[Announcement] 公告已关闭，无法添加新消息");
       return;
     }
     registerMessages(msg, opts);

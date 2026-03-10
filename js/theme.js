@@ -1,14 +1,17 @@
 (() => {
   const root = document.documentElement;
   const cfg = window.__APP_CONFIG__ || {};
-  const THEME_KEY = 'onedays-theme';
-  const ACC_KEY = 'onedays-accent';
+  const THEME_KEY = "onedays-theme";
+  const ACC_KEY = "onedays-accent";
 
-  const toggleBtn = document.getElementById('themeToggle');
+  const toggleBtn = document.getElementById("themeToggle");
   const accents = Array.isArray(cfg.accents) ? cfg.accents : [];
-  const defaultAccentIndex = Number.parseInt(cfg.defaultAccentIndex ?? 0, 10) || 0;
+  const defaultAccentIndex =
+    Number.parseInt(cfg.defaultAccentIndex ?? 0, 10) || 0;
 
-  let accentIdx = Number.parseInt(localStorage.getItem(ACC_KEY) ?? defaultAccentIndex, 10) || 0;
+  let accentIdx =
+    Number.parseInt(localStorage.getItem(ACC_KEY) ?? defaultAccentIndex, 10) ||
+    0;
   let autoTimer = null;
 
   const LONG_PRESS_DELAY = 550;
@@ -31,15 +34,18 @@
 
   const i18nApi = window.__I18N__ || {};
   const translate = (key, fallback) =>
-    typeof i18nApi.t === 'function' ? i18nApi.t(key, fallback ?? key) : (fallback ?? key);
+    typeof i18nApi.t === "function"
+      ? i18nApi.t(key, fallback ?? key)
+      : (fallback ?? key);
 
   const MODE_OPTIONS = [
-    { mode: 'auto', icon: '🌓', label: 'languageThemeAuto' },
-    { mode: 'light', icon: '🌤', label: 'languageThemeLight' },
-    { mode: 'dark', icon: '💤', label: 'languageThemeDark' },
+    { mode: "auto", icon: "🌓", label: "languageThemeAuto" },
+    { mode: "light", icon: "🌤", label: "languageThemeLight" },
+    { mode: "dark", icon: "💤", label: "languageThemeDark" },
   ];
 
-  const accentPanelEnabled = cfg.enableAccentPanel !== false && accents.length > 1;
+  const accentPanelEnabled =
+    cfg.enableAccentPanel !== false && accents.length > 1;
   if (accentPanelEnabled) {
     window.__THEME_PANEL_SUPPORTS_ACCENTS__ = true;
   } else if (window.__THEME_PANEL_SUPPORTS_ACCENTS__) {
@@ -51,7 +57,7 @@
 
   function parseSchedule(raw) {
     if (!autoRotateEnabled) return [];
-    if (!raw || typeof raw !== 'object') return [];
+    if (!raw || typeof raw !== "object") return [];
 
     const namedSlots = {
       midnight: 0,
@@ -70,12 +76,12 @@
       if (!Number.isFinite(index)) continue;
 
       let minutes = null;
-      if (typeof timeKey === 'number') {
+      if (typeof timeKey === "number") {
         minutes = timeKey;
-      } else if (typeof timeKey === 'string') {
+      } else if (typeof timeKey === "string") {
         const key = timeKey.trim().toLowerCase();
         if (/^\d{1,2}:\d{2}$/.test(key)) {
-          const [h, m] = key.split(':').map(Number);
+          const [h, m] = key.split(":").map(Number);
           minutes = (h * 60 + m) % (24 * 60);
         } else if (/^\d+$/.test(key)) {
           minutes = Number(key) % (24 * 60);
@@ -97,10 +103,10 @@
     if (!accents.length) return;
     accentIdx = (i + accents.length) % accents.length;
     const accent = accents[accentIdx];
-    root.style.setProperty('--accent', accent);
-    root.style.setProperty('--accent-hover', accent.replace(/(\d+%?\))?$/, ''));
+    root.style.setProperty("--accent", accent);
+    root.style.setProperty("--accent-hover", accent.replace(/(\d+%?\))?$/, ""));
     if (toggleBtn) {
-      toggleBtn.setAttribute('data-accent', String(accentIdx));
+      toggleBtn.setAttribute("data-accent", String(accentIdx));
     }
     if (opts.persist !== false) {
       try {
@@ -141,7 +147,7 @@
     const secondsNow = now.getSeconds();
     const msNow = now.getMilliseconds();
 
-    let next = autoRotateSchedule.find(entry => entry.minutes > minutesNow);
+    let next = autoRotateSchedule.find((entry) => entry.minutes > minutesNow);
     if (!next) {
       next = autoRotateSchedule[0];
     }
@@ -167,12 +173,12 @@
 
   setAccent(accentIdx, { updateBtn: false });
 
-  const mqlDark = window.matchMedia('(prefers-color-scheme: dark)');
+  const mqlDark = window.matchMedia("(prefers-color-scheme: dark)");
   const sysDark = () => mqlDark.matches;
 
   let savedMode = localStorage.getItem(THEME_KEY);
   if (!savedMode) {
-    savedMode = 'auto';
+    savedMode = "auto";
     try {
       localStorage.setItem(THEME_KEY, savedMode);
     } catch (_) {
@@ -182,41 +188,42 @@
 
   function applyEffective() {
     const dark = sysDark();
-    if (savedMode === 'auto') {
-      root.setAttribute('data-theme', dark ? 'dark' : 'light');
+    if (savedMode === "auto") {
+      root.setAttribute("data-theme", dark ? "dark" : "light");
     } else {
-      root.setAttribute('data-theme', savedMode);
+      root.setAttribute("data-theme", savedMode);
     }
   }
 
   function currentEffective() {
-    return root.getAttribute('data-theme');
+    return root.getAttribute("data-theme");
   }
 
   function updateBtn() {
     if (!toggleBtn) return;
     const effective = currentEffective();
-    let icon = '🌓';
-    if (savedMode === 'auto') {
-      icon = effective === 'dark' ? '💤' : '💻';
+    let icon = "🌓";
+    if (savedMode === "auto") {
+      icon = effective === "dark" ? "💤" : "💻";
     } else {
-      icon = effective === 'dark' ? '🌤' : '🌓';
+      icon = effective === "dark" ? "🌤" : "🌓";
     }
     toggleBtn.textContent = icon;
-    toggleBtn.title = '主题: ' + (savedMode === 'auto' ? '自动(' + effective + ')' : effective);
-    toggleBtn.setAttribute('aria-label', toggleBtn.title);
+    toggleBtn.title =
+      "主题: " + (savedMode === "auto" ? "自动(" + effective + ")" : effective);
+    toggleBtn.setAttribute("aria-label", toggleBtn.title);
     toggleBtn.dataset.mode = savedMode;
-    toggleBtn.setAttribute('data-accent', String(accentIdx));
+    toggleBtn.setAttribute("data-accent", String(accentIdx));
   }
 
   function applyThemeMode(mode) {
-    if (!MODE_OPTIONS.some(item => item.mode === mode)) return;
+    if (!MODE_OPTIONS.some((item) => item.mode === mode)) return;
 
     // 显示遮罩
-    const mask = document.getElementById('themeMask');
+    const mask = document.getElementById("themeMask");
     if (mask) {
       mask.hidden = false;
-      requestAnimationFrame(() => mask.classList.add('show'));
+      requestAnimationFrame(() => mask.classList.add("show"));
     }
 
     // 延迟应用主题变化，让遮罩先显示
@@ -234,7 +241,7 @@
       // 隐藏遮罩
       if (mask) {
         setTimeout(() => {
-          mask.classList.remove('show');
+          mask.classList.remove("show");
           setTimeout(() => (mask.hidden = true), 300);
         }, 100);
       }
@@ -242,7 +249,7 @@
   }
 
   function cycleThemeMode() {
-    const order = MODE_OPTIONS.map(item => item.mode);
+    const order = MODE_OPTIONS.map((item) => item.mode);
     const idx = order.indexOf(savedMode);
     const next = order[(idx + 1) % order.length];
     applyThemeMode(next);
@@ -253,11 +260,11 @@
 
   let lastTap = 0;
   if (toggleBtn) {
-    toggleBtn.addEventListener('pointerdown', handlePointerDown);
-    toggleBtn.addEventListener('pointerup', handlePointerUp);
-    toggleBtn.addEventListener('pointerleave', clearPressTimer);
-    toggleBtn.addEventListener('pointercancel', clearPressTimer);
-    toggleBtn.addEventListener('click', handleClick, true);
+    toggleBtn.addEventListener("pointerdown", handlePointerDown);
+    toggleBtn.addEventListener("pointerup", handlePointerUp);
+    toggleBtn.addEventListener("pointerleave", clearPressTimer);
+    toggleBtn.addEventListener("pointercancel", clearPressTimer);
+    toggleBtn.addEventListener("click", handleClick, true);
   }
 
   function handleClick(event) {
@@ -284,7 +291,7 @@
     if (event.button !== undefined && event.button !== 0) {
       return;
     }
-    if (event.pointerType === 'touch') {
+    if (event.pointerType === "touch") {
       event.preventDefault();
     }
     longPressTriggered = false;
@@ -300,8 +307,8 @@
     if (
       event.button !== undefined &&
       event.button !== 0 &&
-      event.pointerType !== 'touch' &&
-      event.pointerType !== 'pen'
+      event.pointerType !== "touch" &&
+      event.pointerType !== "pen"
     ) {
       clearPressTimer();
       return;
@@ -322,12 +329,12 @@
   }
 
   const darkListener = () => {
-    if (savedMode === 'auto') {
+    if (savedMode === "auto") {
       // 显示遮罩
-      const mask = document.getElementById('themeMask');
+      const mask = document.getElementById("themeMask");
       if (mask) {
         mask.hidden = false;
-        requestAnimationFrame(() => mask.classList.add('show'));
+        requestAnimationFrame(() => mask.classList.add("show"));
       }
 
       // 延迟应用主题变化
@@ -338,7 +345,7 @@
         // 隐藏遮罩
         if (mask) {
           setTimeout(() => {
-            mask.classList.remove('show');
+            mask.classList.remove("show");
             setTimeout(() => (mask.hidden = true), 300);
           }, 100);
         }
@@ -346,34 +353,41 @@
     }
   };
 
-  if (typeof mqlDark.addEventListener === 'function') {
-    mqlDark.addEventListener('change', darkListener);
-  } else if (typeof mqlDark.addListener === 'function') {
+  if (typeof mqlDark.addEventListener === "function") {
+    mqlDark.addEventListener("change", darkListener);
+  } else if (typeof mqlDark.addListener === "function") {
     mqlDark.addListener(darkListener);
   }
 
   function isLanguagePanelOpen() {
-    return !!(langPanel && !langPanel.hidden && langPanel.classList.contains('open'));
+    return !!(
+      langPanel &&
+      !langPanel.hidden &&
+      langPanel.classList.contains("open")
+    );
   }
 
   function ensureLanguagePanel() {
     if (langPanel) return langPanel;
 
     // 创建面板容器
-    langPanel = document.createElement('div');
-    langPanel.className = 'theme-lang-panel';
+    langPanel = document.createElement("div");
+    langPanel.className = "theme-lang-panel";
     langPanel.hidden = true;
-    langPanel.setAttribute('role', 'menu');
-    langPanel.setAttribute('aria-label', translate('languagePickerTitle', 'Choose language'));
+    langPanel.setAttribute("role", "menu");
+    langPanel.setAttribute(
+      "aria-label",
+      translate("languagePickerTitle", "Choose language"),
+    );
 
     // 使用DocumentFragment优化DOM操作
     const fragment = document.createDocumentFragment();
 
     // 创建面板各部分
-    langHeader = createPanelElement('div', 'theme-lang-header');
+    langHeader = createPanelElement("div", "theme-lang-header");
     fragment.appendChild(langHeader);
 
-    langHint = createPanelElement('div', 'theme-lang-hint');
+    langHint = createPanelElement("div", "theme-lang-hint");
     fragment.appendChild(langHint);
 
     // 主题选择区域
@@ -387,20 +401,20 @@
     }
 
     // 语言选择区域
-    langList = createPanelElement('div', 'theme-lang-list');
+    langList = createPanelElement("div", "theme-lang-list");
     fragment.appendChild(langList);
 
     langPanel.appendChild(fragment);
     document.body.appendChild(langPanel);
 
     // 绑定语言变化事件
-    window.addEventListener('languageChanged', handleLanguageChange);
+    window.addEventListener("languageChanged", handleLanguageChange);
 
     return langPanel;
   }
 
   // 辅助函数：创建面板元素
-  function createPanelElement(tagName, className, textContent = '') {
+  function createPanelElement(tagName, className, textContent = "") {
     const element = document.createElement(tagName);
     element.className = className;
     if (textContent) element.textContent = textContent;
@@ -409,12 +423,12 @@
 
   // 创建主题选择区域
   function createThemeSection() {
-    const section = createPanelElement('div', 'theme-lang-theme');
+    const section = createPanelElement("div", "theme-lang-theme");
 
-    langThemeTitle = createPanelElement('div', 'theme-lang-theme-title');
+    langThemeTitle = createPanelElement("div", "theme-lang-theme-title");
     section.appendChild(langThemeTitle);
 
-    langThemeActions = createPanelElement('div', 'theme-lang-theme-actions');
+    langThemeActions = createPanelElement("div", "theme-lang-theme-actions");
     section.appendChild(langThemeActions);
 
     return section;
@@ -422,12 +436,12 @@
 
   // 创建强调色选择区域
   function createAccentSection() {
-    const section = createPanelElement('div', 'theme-lang-accent');
+    const section = createPanelElement("div", "theme-lang-accent");
 
-    langAccentTitle = createPanelElement('div', 'theme-lang-accent-title');
+    langAccentTitle = createPanelElement("div", "theme-lang-accent-title");
     section.appendChild(langAccentTitle);
 
-    langAccentList = createPanelElement('div', 'theme-lang-accent-list');
+    langAccentList = createPanelElement("div", "theme-lang-accent-list");
     section.appendChild(langAccentList);
 
     return section;
@@ -443,16 +457,30 @@
 
   function updateLanguagePanelTexts() {
     if (!langPanel) return;
-    if (langHeader) langHeader.textContent = translate('languagePickerTitle', 'Choose language');
+    if (langHeader)
+      langHeader.textContent = translate(
+        "languagePickerTitle",
+        "Choose language",
+      );
     if (langHint)
       langHint.textContent = translate(
-        'languagePickerHint',
-        'Tap an option to switch immediately.'
+        "languagePickerHint",
+        "Tap an option to switch immediately.",
       );
-    if (langThemeTitle) langThemeTitle.textContent = translate('languageThemeTitle', 'Theme mode');
+    if (langThemeTitle)
+      langThemeTitle.textContent = translate(
+        "languageThemeTitle",
+        "Theme mode",
+      );
     if (langAccentTitle)
-      langAccentTitle.textContent = translate('languageAccentTitle', 'Accent color');
-    langPanel?.setAttribute('aria-label', translate('languagePickerTitle', 'Choose language'));
+      langAccentTitle.textContent = translate(
+        "languageAccentTitle",
+        "Accent color",
+      );
+    langPanel?.setAttribute(
+      "aria-label",
+      translate("languagePickerTitle", "Choose language"),
+    );
   }
 
   function renderLanguagePanel() {
@@ -475,17 +503,21 @@
     if (!langList) return;
 
     const languages =
-      typeof i18nApi.getAvailableLanguages === 'function' ? i18nApi.getAvailableLanguages() : [];
+      typeof i18nApi.getAvailableLanguages === "function"
+        ? i18nApi.getAvailableLanguages()
+        : [];
     const currentLang =
-      typeof i18nApi.getCurrentLanguage === 'function' ? i18nApi.getCurrentLanguage() : null;
+      typeof i18nApi.getCurrentLanguage === "function"
+        ? i18nApi.getCurrentLanguage()
+        : null;
 
     if (!languages.length) {
       const empty = createPanelElement(
-        'div',
-        'theme-lang-empty',
-        translate('languagePickerEmpty', 'No languages available')
+        "div",
+        "theme-lang-empty",
+        translate("languagePickerEmpty", "No languages available"),
       );
-      langList.innerHTML = '';
+      langList.innerHTML = "";
       langList.appendChild(empty);
       return;
     }
@@ -497,45 +529,48 @@
       fragment.appendChild(option);
     });
 
-    langList.innerHTML = '';
+    langList.innerHTML = "";
     langList.appendChild(fragment);
   }
 
   // 创建语言选项
   function createLanguageOption(code, name, currentLang) {
-    const option = document.createElement('button');
-    option.type = 'button';
-    option.className = 'theme-lang-option';
+    const option = document.createElement("button");
+    option.type = "button";
+    option.className = "theme-lang-option";
     option.dataset.lang = code;
-    option.setAttribute('role', 'menuitemradio');
-    option.setAttribute('aria-checked', code === currentLang ? 'true' : 'false');
+    option.setAttribute("role", "menuitemradio");
+    option.setAttribute(
+      "aria-checked",
+      code === currentLang ? "true" : "false",
+    );
 
     // 使用DocumentFragment创建选项内容
     const optionFragment = document.createDocumentFragment();
 
-    const dot = createPanelElement('span', 'theme-lang-dot');
+    const dot = createPanelElement("span", "theme-lang-dot");
     optionFragment.appendChild(dot);
 
-    const label = createPanelElement('span', 'theme-lang-name', name);
+    const label = createPanelElement("span", "theme-lang-name", name);
     optionFragment.appendChild(label);
 
-    const codeTag = createPanelElement('span', 'theme-lang-code', code);
+    const codeTag = createPanelElement("span", "theme-lang-code", code);
     optionFragment.appendChild(codeTag);
 
     if (code === currentLang) {
-      option.classList.add('active');
+      option.classList.add("active");
       const badge = createPanelElement(
-        'span',
-        'theme-lang-current',
-        translate('languageCurrentTag', 'Current')
+        "span",
+        "theme-lang-current",
+        translate("languageCurrentTag", "Current"),
       );
       optionFragment.appendChild(badge);
     }
 
     option.appendChild(optionFragment);
 
-    option.addEventListener('click', () => {
-      if (typeof i18nApi.setLanguage === 'function') {
+    option.addEventListener("click", () => {
+      if (typeof i18nApi.setLanguage === "function") {
         i18nApi.setLanguage(code);
       }
       hideLanguagePanel();
@@ -555,31 +590,35 @@
       fragment.appendChild(btn);
     });
 
-    langThemeActions.innerHTML = '';
+    langThemeActions.innerHTML = "";
     langThemeActions.appendChild(fragment);
     refreshThemeButtons();
   }
 
   // 创建主题按钮
   function createThemeButton(mode, icon, label) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'theme-lang-theme-btn';
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "theme-lang-theme-btn";
     btn.dataset.mode = mode;
-    btn.setAttribute('aria-pressed', 'false');
+    btn.setAttribute("aria-pressed", "false");
 
     // 使用DocumentFragment创建按钮内容
     const btnFragment = document.createDocumentFragment();
 
-    const iconSpan = createPanelElement('span', 'theme-lang-theme-icon', icon);
+    const iconSpan = createPanelElement("span", "theme-lang-theme-icon", icon);
     btnFragment.appendChild(iconSpan);
 
-    const textSpan = createPanelElement('span', 'theme-lang-theme-text', translate(label, mode));
+    const textSpan = createPanelElement(
+      "span",
+      "theme-lang-theme-text",
+      translate(label, mode),
+    );
     btnFragment.appendChild(textSpan);
 
     btn.appendChild(btnFragment);
 
-    btn.addEventListener('click', () => applyThemeMode(mode));
+    btn.addEventListener("click", () => applyThemeMode(mode));
 
     return btn;
   }
@@ -594,26 +633,26 @@
       fragment.appendChild(btn);
     });
 
-    langAccentList.innerHTML = '';
+    langAccentList.innerHTML = "";
     langAccentList.appendChild(fragment);
     refreshAccentButtons();
   }
 
   // 创建强调色按钮
   function createAccentButton(color, idx) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'theme-lang-accent-dot';
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "theme-lang-accent-dot";
     btn.dataset.index = String(idx);
-    btn.setAttribute('aria-pressed', 'false');
+    btn.setAttribute("aria-pressed", "false");
     btn.setAttribute(
-      'aria-label',
-      `${translate('languageAccentOption', 'Accent color')} ${idx + 1}`
+      "aria-label",
+      `${translate("languageAccentOption", "Accent color")} ${idx + 1}`,
     );
-    btn.style.setProperty('--swatch-color', color);
+    btn.style.setProperty("--swatch-color", color);
     btn.title = color;
 
-    btn.addEventListener('click', () => {
+    btn.addEventListener("click", () => {
       if (accentIdx === idx) return;
       setAccent(idx);
       scheduleNextRotate();
@@ -624,20 +663,22 @@
 
   function refreshThemeButtons() {
     if (!langThemeActions) return;
-    langThemeActions.querySelectorAll('.theme-lang-theme-btn').forEach(btn => {
-      const active = btn.dataset.mode === savedMode;
-      btn.classList.toggle('active', active);
-      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-    });
+    langThemeActions
+      .querySelectorAll(".theme-lang-theme-btn")
+      .forEach((btn) => {
+        const active = btn.dataset.mode === savedMode;
+        btn.classList.toggle("active", active);
+        btn.setAttribute("aria-pressed", active ? "true" : "false");
+      });
   }
 
   function refreshAccentButtons() {
     if (!accentPanelEnabled || !langAccentList) return;
-    langAccentList.querySelectorAll('.theme-lang-accent-dot').forEach(btn => {
-      const index = Number.parseInt(btn.dataset.index ?? '-1', 10);
+    langAccentList.querySelectorAll(".theme-lang-accent-dot").forEach((btn) => {
+      const index = Number.parseInt(btn.dataset.index ?? "-1", 10);
       const active = index === accentIdx;
-      btn.classList.toggle('active', active);
-      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-pressed", active ? "true" : "false");
     });
   }
 
@@ -656,7 +697,7 @@
     remove(type, listener) {
       const listeners = this.listeners.get(type);
       if (listeners) {
-        const index = listeners.findIndex(item => item.listener === listener);
+        const index = listeners.findIndex((item) => item.listener === listener);
         if (index > -1) {
           listeners.splice(index, 1);
           document.removeEventListener(type, listener);
@@ -691,7 +732,7 @@
     positionLanguagePanel();
 
     requestAnimationFrame(() => {
-      panel.classList.add('open');
+      panel.classList.add("open");
       // 将焦点设置到面板的第一个可聚焦元素
       const firstFocusable = getFocusableElements()[0];
       if (firstFocusable) {
@@ -700,25 +741,25 @@
     });
 
     // 使用事件管理器添加事件监听器
-    eventManager.add('pointerdown', handleOutsidePress, { capture: true });
-    eventManager.add('keydown', handlePanelKeydown, { capture: true });
-    window.addEventListener('resize', debouncedPositionPanel);
-    window.addEventListener('scroll', handlePanelScroll, true);
+    eventManager.add("pointerdown", handleOutsidePress, { capture: true });
+    eventManager.add("keydown", handlePanelKeydown, { capture: true });
+    window.addEventListener("resize", debouncedPositionPanel);
+    window.addEventListener("scroll", handlePanelScroll, true);
   }
 
   function hideLanguagePanel() {
     if (!langPanel || langPanel.hidden) return;
 
-    langPanel.classList.remove('open');
+    langPanel.classList.remove("open");
 
     // 使用事件管理器移除事件监听器
-    eventManager.removeAll('pointerdown');
-    eventManager.removeAll('keydown');
-    window.removeEventListener('resize', debouncedPositionPanel);
-    window.removeEventListener('scroll', handlePanelScroll, true);
+    eventManager.removeAll("pointerdown");
+    eventManager.removeAll("keydown");
+    window.removeEventListener("resize", debouncedPositionPanel);
+    window.removeEventListener("scroll", handlePanelScroll, true);
 
     setTimeout(() => {
-      if (langPanel && !langPanel.classList.contains('open')) {
+      if (langPanel && !langPanel.classList.contains("open")) {
         langPanel.hidden = true;
       }
     }, 200);
@@ -751,20 +792,24 @@
       top = Math.max(margin, top);
     }
     const centerX = rect.left + rect.width / 2;
-    const clampedCenter = Math.min(viewportWidth - margin, Math.max(margin, centerX));
+    const clampedCenter = Math.min(
+      viewportWidth - margin,
+      Math.max(margin, centerX),
+    );
     langPanel.style.top = `${top}px`;
     langPanel.style.left = `${clampedCenter}px`;
-    langPanel.classList.toggle('theme-lang-panel--above', showAbove);
+    langPanel.classList.toggle("theme-lang-panel--above", showAbove);
   }
 
   function handleOutsidePress(event) {
     if (!langPanel) return;
-    if (langPanel.contains(event.target) || toggleBtn?.contains(event.target)) return;
+    if (langPanel.contains(event.target) || toggleBtn?.contains(event.target))
+      return;
     hideLanguagePanel();
   }
 
   function handlePanelKeydown(event) {
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       hideLanguagePanel();
       return;
     }
@@ -774,23 +819,23 @@
     const currentIndex = focusableElements.indexOf(document.activeElement);
 
     switch (event.key) {
-      case 'ArrowDown':
+      case "ArrowDown":
         event.preventDefault();
         focusNextElement(focusableElements, currentIndex);
         break;
-      case 'ArrowUp':
+      case "ArrowUp":
         event.preventDefault();
         focusPreviousElement(focusableElements, currentIndex);
         break;
-      case 'Home':
+      case "Home":
         event.preventDefault();
         focusableElements[0]?.focus();
         break;
-      case 'End':
+      case "End":
         event.preventDefault();
         focusableElements[focusableElements.length - 1]?.focus();
         break;
-      case 'Tab':
+      case "Tab":
         // 允许Tab键在面板内循环
         if (event.shiftKey) {
           if (currentIndex === 0) {
@@ -812,9 +857,11 @@
     if (!langPanel) return [];
     return Array.from(
       langPanel.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      )
-    ).filter(el => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden'));
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter(
+      (el) => !el.hasAttribute("disabled") && !el.getAttribute("aria-hidden"),
+    );
   }
 
   // 聚焦下一个元素
@@ -825,7 +872,8 @@
 
   // 聚焦上一个元素
   function focusPreviousElement(elements, currentIndex) {
-    const prevIndex = currentIndex <= 0 ? elements.length - 1 : currentIndex - 1;
+    const prevIndex =
+      currentIndex <= 0 ? elements.length - 1 : currentIndex - 1;
     elements[prevIndex]?.focus();
   }
 
@@ -862,13 +910,13 @@
       try {
         ensureLanguagePanel();
       } catch (error) {
-        console.error('[Theme Panel] Failed to create language panel:', error);
+        console.error("[Theme Panel] Failed to create language panel:", error);
       }
     },
 
     // 绑定事件
     bindEvents() {
-      window.addEventListener('languageChanged', () => {
+      window.addEventListener("languageChanged", () => {
         this.updateTexts();
         if (this.isVisible()) {
           this.render();
