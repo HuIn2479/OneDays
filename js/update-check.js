@@ -137,6 +137,7 @@
         console.warn("[Update] releaseMemory failed:", err);
       }
 
+      // 清除 CacheStorage
       if ("caches" in window) {
         try {
           const keys = await window.caches.keys();
@@ -145,6 +146,16 @@
           );
         } catch (err) {
           console.warn("[Update] CacheStorage cleanup failed:", err);
+        }
+      }
+
+      // 注销 Service Worker 以确保下次加载全新资源
+      if ("serviceWorker" in navigator) {
+        try {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.allSettled(regs.map((r) => r.unregister()));
+        } catch (err) {
+          console.warn("[Update] SW unregister failed:", err);
         }
       }
     },
@@ -250,6 +261,15 @@
           " " +
           t("updateQuietPeriod"),
       );
+      if (typeof window.createToast === "function") {
+        window.createToast({
+          text: t("updateNewVersion") + " " + remoteVersion,
+          variant: "accent",
+          icon: "🔄",
+          id: "update-defer",
+          duration: 4000,
+        });
+      }
       scheduleNext();
       return;
     }
@@ -263,6 +283,15 @@
           buildGapInfo() +
           t("updateWillRefresh"),
       );
+      if (typeof window.createToast === "function") {
+        window.createToast({
+          text: t("updateFound") + " " + remoteVersion,
+          variant: "success",
+          icon: "🚀",
+          id: "update-found",
+          duration: 3000,
+        });
+      }
       setTimeout(() => applyUpdate(remoteVersion), 1500);
     };
 
@@ -271,6 +300,16 @@
       announcer.push(
         t("updateReady") + " " + remoteVersion + " " + t("updateReadySuffix"),
       );
+      if (typeof window.createToast === "function") {
+        window.createToast({
+          text: t("updateReady") + " " + remoteVersion,
+          variant: "neutral",
+          icon: "⏳",
+          id: "update-ready",
+          duration: 4000,
+          closable: true,
+        });
+      }
       scheduleNext();
       return;
     }
@@ -337,6 +376,15 @@
         t("updateVersions");
     }
     announcer.push(message);
+    if (typeof window.createToast === "function") {
+      window.createToast({
+        text: message,
+        variant: "success",
+        icon: "✅",
+        id: "update-done",
+        duration: 5000,
+      });
+    }
 
     state.gapList = [];
     persistGapList();
@@ -350,6 +398,15 @@
     const version = window.__PENDING_UPDATE__;
     window.__PENDING_UPDATE__ = undefined;
     announcer.push(t("updateApplying") + " " + version + " …");
+    if (typeof window.createToast === "function") {
+      window.createToast({
+        text: t("updateApplying") + " " + version,
+        variant: "accent",
+        icon: "🔄",
+        id: "update-apply",
+        duration: 2000,
+      });
+    }
     setTimeout(() => applyUpdate(version), 600);
   });
 

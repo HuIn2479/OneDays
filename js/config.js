@@ -1,6 +1,6 @@
 (function () {
   const config = {
-    version: "v0.14.6",
+    version: "v0.14.8",
     meta: {
       launchDate: "2021-02-27T00:00:00+08:00",
       title: "忆窝",
@@ -130,63 +130,10 @@
     },
   };
 
-  const flat = {
-    launchDate: config.meta.launchDate,
-    title: config.meta.title,
-    subtitle: config.meta.subtitle,
-    enableSplash: config.splash.enable,
-    splashMinDuration: config.splash.minDuration,
-    removeSplashIfFast: config.splash.removeIfFast,
-    skeletonFadeDelay: config.splash.skeletonFadeDelay,
-    splashHeading: config.splash.heading,
-    splashSubheading: config.splash.subheading,
-    accents: config.theme.accents,
-    defaultAccentIndex: config.theme.defaultAccentIndex,
-    enableAccentPanel: config.theme.enableAccentPanel,
-    enableAccentAutoRotate: config.theme.autoRotate?.enable,
-    accentRotateSchedule: config.theme.autoRotate?.schedule,
-    enableScrollProgress: config.effects.enableScrollProgress,
-    enableRuntime: config.runtime.enable,
-    enableHitokoto: config.hitokoto.enable,
-    hitokotoProvider: config.hitokoto.provider,
-    hitokotoApis: config.hitokoto.apis,
-    hitokotoTimeout: config.hitokoto.timeout,
-    hitokotoRetries: config.hitokoto.retries,
-    hitokotoCacheTime: config.hitokoto.cacheTime,
-    enableAnnouncement: config.announcement.enable,
-    announcementIcon: config.announcement.icon,
-    announcementMessages: config.announcement.messages,
-    announcementCycleInterval: config.announcement.cycleInterval,
-    announcementTransition: config.announcement.transition,
-    announcementDismissKey: config.announcement.dismissKey,
-    enableAnnouncementClose: config.announcement.closeButton,
-    enableAnnouncementRemoteFeed: config.announcement.remoteFeed?.enable,
-    announcementRemoteSource: config.announcement.remoteFeed?.source,
-    announcementRemoteRefresh: config.announcement.remoteFeed?.refreshInterval,
-    adaptivePerformance: config.performance.adaptive,
-    enableIdleAutoRelease: config.performance.idleAutoRelease,
-    idleReleaseDelay: config.performance.idleReleaseDelay,
-    idleDeepReleaseDelay: config.performance.idleDeepReleaseDelay,
-    enableIdleAutoRestore: config.performance.idleAutoRestore,
-    enableUpdateCheck: config.update.enable,
-    updateCheckInterval: config.update.checkInterval,
-    updateNotifyDelay: config.update.notifyDelay,
-    updateSource: config.update.source,
-    enableNavigation: config.navigation.enable,
-    navigationMaxDisplayCount: config.navigation.maxDisplayCount || 4,
-    navigationShowAll: config.navigation.showAll || false,
-    navigationCards: config.navigation.cards,
-    enableNavigationFilters: config.navigation.filters?.enable,
-    navigationFilterTags: config.navigation.filters?.tags,
-    version: config.version,
-    enableKonami: config.easter.konami,
-    enableTitleClicks: config.easter.titleClicks,
-    titleClickWindow: config.easter.maxTitleInterval,
-    titleClickThreshold: config.easter.titleClickThreshold,
-    enableAsciiPanel: config.easter.ascii,
-    enableConfetti: config.easter.confetti,
-    catDriftInterval: config.easter.catDriftInterval,
-  };
+  // 扁平化配置由 config-flat.js 的 __flattenConfig 生成
+  const flat = typeof window.__flattenConfig === "function"
+    ? window.__flattenConfig(config)
+    : {};
 
   window.__APP_CONFIG__ = Object.assign({}, config, flat);
 })();

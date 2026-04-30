@@ -54,6 +54,15 @@
     return JSON.stringify(msg);
   }
 
+  function isExpired(msg) {
+    if (!msg || typeof msg !== "object" || !msg.expiresAt) return false;
+    try {
+      return new Date(msg.expiresAt).getTime() < Date.now();
+    } catch (_) {
+      return false;
+    }
+  }
+
   function normalizeMessage(msg) {
     if (!msg) return null;
     if (typeof msg === "string") return { text: msg };
@@ -69,6 +78,7 @@
     for (const msg of list) {
       const normalizedMsg = normalizeMessage(msg);
       if (!normalizedMsg) continue;
+      if (isExpired(normalizedMsg)) continue;
       const key = makeKey(normalizedMsg);
       if (key && state.seenKeys.has(key)) continue;
       if (key) state.seenKeys.add(key);
@@ -105,6 +115,16 @@
     }
   }
 
+  function applyMessageStyle(msg) {
+    box.classList.remove("ann-info", "ann-warn", "ann-success", "ann-error");
+    if (msg && msg.priority) {
+      box.classList.add("ann-" + msg.priority);
+    }
+    if (iconEl) {
+      iconEl.textContent = (msg && msg.icon) || cfg.announcementIcon || "📢";
+    }
+  }
+
   function showSingleMessage(msg) {
     stopRotation();
     state.mode = "single";
@@ -114,6 +134,7 @@
       state.stack = null;
     }
     host.textContent = getText(msg);
+    applyMessageStyle(msg);
   }
 
   function ensureCarouselStructure() {
@@ -163,6 +184,7 @@
     currentPane.textContent = getText(currentMsg);
     currentPane.classList.add("active");
     nextPane.classList.remove("active");
+    applyMessageStyle(currentMsg);
     state.index = (state.index + 1) % state.items.length;
 
     requestAnimationFrame(() => {
@@ -189,6 +211,7 @@
     state.index = (state.index + 1) % state.items.length;
 
     nextPane.textContent = getText(nextMsg);
+    applyMessageStyle(nextMsg);
 
     requestAnimationFrame(() => {
       const newHeight = nextPane.offsetHeight;

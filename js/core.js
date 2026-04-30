@@ -77,6 +77,7 @@
         id,
         variant = "accent",
         closable = false,
+        icon,
       } = opts;
       if (id && document.querySelector(`[data-toast-id="${id}"]`)) return; // 防重复
       let wrap = document.getElementById("__toast_container");
@@ -91,7 +92,6 @@
       // 队列上限（4 个）
       const MAX = 4;
       if (wrap.children.length >= MAX) {
-        // 移除最早的（跳过具有相同 id 的保留）
         for (let i = 0; i < wrap.children.length; i++) {
           const c = wrap.children[i];
           c.classList.add("toast-leave");
@@ -102,7 +102,17 @@
       const el = document.createElement("div");
       el.dataset.toastId = id || "";
       el.className = `toast toast-${variant}`;
-      el.textContent = text;
+      if (icon) {
+        const iconSpan = document.createElement("span");
+        iconSpan.className = "toast-icon";
+        iconSpan.textContent = icon;
+        iconSpan.setAttribute("aria-hidden", "true");
+        el.appendChild(iconSpan);
+      }
+      const textSpan = document.createElement("span");
+      textSpan.className = "toast-text";
+      textSpan.textContent = text;
+      el.appendChild(textSpan);
       if (closable) {
         const btn = document.createElement("button");
         btn.type = "button";
@@ -139,6 +149,7 @@
           variant: "danger",
           id: "net-off",
           duration: 3000,
+          icon: "📡",
         }),
       );
       window.addEventListener("online", () =>
@@ -147,6 +158,7 @@
           variant: "success",
           id: "net-on",
           duration: 2500,
+          icon: "✨",
         }),
       );
     }

@@ -104,7 +104,11 @@
     accentIdx = (i + accents.length) % accents.length;
     const accent = accents[accentIdx];
     root.style.setProperty("--accent", accent);
-    root.style.setProperty("--accent-hover", accent.replace(/(\d+%?\))?$/, ""));
+    // 使用 color-mix 生成 hover 色，兼容所有颜色格式
+    root.style.setProperty(
+      "--accent-hover",
+      `color-mix(in srgb, ${accent} 85%, #000)`,
+    );
     if (toggleBtn) {
       toggleBtn.setAttribute("data-accent", String(accentIdx));
     }

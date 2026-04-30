@@ -134,15 +134,16 @@
     const rain = document.createElement("div");
     rain.className = "splash-matrix-rain";
 
-    // 创建多个雨滴列
-    for (let i = 0; i < 15; i++) {
+    // 创建多个雨滴列（精简为 8 列 × 8 字符，减少 DOM 开销）
+    const COLS = 8;
+    const CHARS_PER_COL = 8;
+    for (let i = 0; i < COLS; i++) {
       const column = document.createElement("div");
       column.className = "splash-matrix-column";
-      column.style.left = `${(i / 15) * 100}%`;
+      column.style.left = `${(i / COLS) * 100}%`;
       column.style.animationDelay = `${Math.random() * 2}s`;
 
-      // 每个列包含多个字符
-      for (let j = 0; j < 20; j++) {
+      for (let j = 0; j < CHARS_PER_COL; j++) {
         const char = document.createElement("span");
         char.className = "splash-matrix-char";
         char.textContent = getRandomChar();
@@ -189,27 +190,32 @@
     return chars[Math.floor(Math.random() * chars.length)];
   }
 
-  // 启动字符动画
+  // 启动字符动画（使用 rAF + 节流，比 setInterval 更流畅且省电）
   function startCharAnimation(container) {
     const chars = container.querySelectorAll(".splash-matrix-char");
-    let interval;
-    let observer;
-    let timeout;
+    let rafId = null;
+    let observer = null;
+    let timeout = null;
+    let lastUpdate = 0;
+    const THROTTLE = 120; // ms，约 8fps，足够视觉效果
 
-    const updateChars = () => {
-      chars.forEach((char) => {
-        if (Math.random() < 0.02) {
-          // 2% 概率更新
-          char.textContent = getRandomChar();
-          char.style.opacity = Math.random() * 0.5 + 0.5;
+    const updateChars = (now) => {
+      if (now - lastUpdate >= THROTTLE) {
+        lastUpdate = now;
+        for (let i = 0; i < chars.length; i++) {
+          if (Math.random() < 0.03) {
+            chars[i].textContent = getRandomChar();
+            chars[i].style.opacity = Math.random() * 0.5 + 0.5;
+          }
         }
-      });
+      }
+      rafId = requestAnimationFrame(updateChars);
     };
 
     const cleanup = () => {
-      if (interval) {
-        clearInterval(interval);
-        interval = null;
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
       }
       if (observer) {
         observer.disconnect();
@@ -221,8 +227,7 @@
       }
     };
 
-    // 每100ms更新一次
-    interval = setInterval(updateChars, 100);
+    rafId = requestAnimationFrame(updateChars);
 
     // 当开屏消失时清理
     observer = new MutationObserver(() => {
@@ -241,7 +246,6 @@
     // 安全超时：最长运行10秒后自动清理
     timeout = setTimeout(cleanup, 10000);
 
-    // 将清理函数暴露给全局，以便在需要时手动清理
     container._cleanupAnimation = cleanup;
   }
 
