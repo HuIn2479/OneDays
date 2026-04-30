@@ -1,0 +1,26 @@
+{
+  "cards": [
+    {
+      "id": "Blog",
+      "icon": "🎯",
+      "title": "Memos",
+      "description": " 什么时候会更新呢？",
+      "url": "https://n.eki.ink",
+      "target": "_self",
+      "tags": ["blog", "life"]
+    },
+    {
+      "id": "GitHub",
+      "icon": "🐱",
+      "title": "GitHub",
+      "description": "什么也不会",
+      "url": "https://github.com/Huin2479",
+      "target": "_self",
+      "tags": ["dev"]
+    }
+  ],
+  "filters": {
+    "enable": true,
+    "tags": ["blog", "dev", "life"]
+  }
+}

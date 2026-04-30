@@ -1,0 +1,18 @@
+{
+  "accents": [
+    "hsl(350 82% 54%)",
+    "hsl(215 85% 55%)",
+    "hsl(135 50% 42%)",
+    "hsl(32 90% 52%)",
+    "hsl(275 70% 60%)"
+  ],
+  "defaultAccentIndex": 0,
+  "autoRotate": {
+    "schedule": {
+      "dawn": 0,
+      "noon": 1,
+      "dusk": 2,
+      "night": 4
+    }
+  }
+}

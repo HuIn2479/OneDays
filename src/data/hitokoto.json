@@ -1,0 +1,16 @@
+{
+  "apis": {
+    "hitokoto": {
+      "url": "https://v1.hitokoto.cn/",
+      "categories": ["a", "b", "d", "h"],
+      "params": { "encode": "json" }
+    },
+    "custom": {
+      "url": "",
+      "params": {}
+    }
+  },
+  "timeout": 8000,
+  "retries": 2,
+  "cacheTime": 300000
+}

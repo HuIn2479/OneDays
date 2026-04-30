@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "launchDate": "2021-02-27",
+    "title": "忆窝",
+    "subtitle": "One Day."
+  },
+  "splash": {
+    "heading": "忆窝",
+    "subheading": "Sakura daydreams are loading…"
+  },
+  "announcement": {
+    "icon": "😽",
+    "messages": [
+      "平安喜樂，萬事勝意，祝你，祝我，祝我們",
+      "ISTP-A | 机械键盘爱好者 | 猫奴"
+    ],
+    "cycleInterval": 4800,
+    "transition": 500,
+    "dismissKey": "ann-v4"
+  }
+}
