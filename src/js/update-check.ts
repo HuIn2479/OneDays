@@ -2,6 +2,7 @@ import { APP_CONFIG } from './config';
 import { i18n } from './i18n';
 import { createToast } from './core';
 import { setUpdateLock, setPendingUpdate, setMemReleased, UPDATE_LOCK, PENDING_UPDATE } from './shared-state';
+import { appendQuery, isOwnedCacheKey, isOwnedServiceWorkerScope } from './runtime-guards';
 
 interface StorageKeys {
   version: string;
@@ -163,7 +164,7 @@ const versionParser = {
 };
 
 const cacheCleaner = {
-  async flushAll(): Promise<void> {
+  async flushOwnedCaches(): Promise<void> {
     try {
       const m = await import('./extras');
       m.releaseMemory(2);
@@ -174,7 +175,7 @@ const cacheCleaner = {
       try {
         const keys = await window.caches.keys();
         await Promise.allSettled(
-          keys.map((key) => window.caches.delete(key)),
+          keys.filter(isOwnedCacheKey).map((key) => window.caches.delete(key)),
         );
       } catch (err) {
         console.warn("[Update] CacheStorage cleanup failed:", err);
@@ -185,7 +186,12 @@ const cacheCleaner = {
     if ("serviceWorker" in navigator) {
       try {
         const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.allSettled(regs.map((r) => r.unregister()));
+        const appScope = new URL("./", window.location.href).href;
+        await Promise.allSettled(
+          regs
+            .filter((r) => isOwnedServiceWorkerScope(r.scope, appScope))
+            .map((r) => r.unregister()),
+        );
       } catch (err) {
         console.warn("[Update] SW unregister failed:", err);
       }
@@ -231,11 +237,7 @@ function buildGapInfo(): string {
 }
 
 async function fetchRemoteVersion(attempt: number = 0): Promise<string | null> {
-  const url =
-    SETTINGS.source +
-    (SETTINGS.source.includes("?") ? "&" : "?") +
-    "v=" +
-    Date.now();
+  const url = appendQuery(SETTINGS.source, { v: Date.now() });
   try {
     const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) return null;
@@ -256,7 +258,7 @@ async function applyUpdate(remoteVersion?: string): Promise<void> {
   storage.set(STORAGE_KEYS.lastUpdate, stamp.toString());
   state.lastUpdate = stamp;
 
-  await cacheCleaner.flushAll();
+  await cacheCleaner.flushOwnedCaches();
 
   const url = new URL(window.location.href);
   url.searchParams.set("v", stamp.toString());

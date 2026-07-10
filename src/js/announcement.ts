@@ -1,4 +1,5 @@
 import { APP_CONFIG } from './config';
+import { readStorage, removeStorage, writeStorage } from './runtime-guards';
 
 interface AnnouncementMessage {
   text: string;
@@ -49,9 +50,9 @@ if (box) {
       console.warn('[Announcement] 找不到文本容器 .ann-text');
     } else {
       const storeKey: string = cfg.announcementDismissKey || 'ann-card-v1';
-      if (localStorage.getItem(storeKey)) {
+      if (readStorage(storeKey)) {
         (window as any).__announceRestore = () => {
-          localStorage.removeItem(storeKey);
+          removeStorage(storeKey);
           location.reload();
         };
         box.remove();
@@ -311,7 +312,7 @@ if (box) {
           closeBtn.hidden = false;
           closeBtn.addEventListener('click', () => {
             try {
-              localStorage.setItem(storeKey, '1');
+              writeStorage(storeKey, '1');
             } catch (_) {
               /* ignore */
             }

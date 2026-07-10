@@ -1,4 +1,5 @@
 // i18n.ts -- ES module version of i18n.js
+import { readStorage, writeStorage } from "./runtime-guards";
 
 interface Translations {
   [lang: string]: Record<string, string>;
@@ -250,7 +251,7 @@ const defaultLang: string = "zh-CN";
 // 检测浏览器语言
 function detectLanguage(): string {
   // 首先检查本地存储
-  const savedLang = localStorage.getItem("preferred-language");
+  const savedLang = readStorage("preferred-language");
   if (savedLang && translations[savedLang]) {
     return savedLang;
   }
@@ -285,7 +286,7 @@ function t(key: string, fallback: string = key): string {
 function setLanguage(lang: string): void {
   if (translations[lang]) {
     currentLang = lang;
-    localStorage.setItem("preferred-language", lang);
+    writeStorage("preferred-language", lang);
 
     // 触发语言变更事件
     window.dispatchEvent(

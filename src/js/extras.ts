@@ -11,6 +11,8 @@ try {
 } catch (_) {}
 
 let cleanups: Array<() => void> = [];
+let closeAsciiPanel: (() => void) | null = null;
+let idleReleasedLevel1 = false;
 const root: HTMLElement = document.documentElement;
 const body: HTMLElement = document.body;
 
@@ -290,7 +292,12 @@ try {
           navigator.clipboard.writeText(ascii).then(() => toast('已复制'));
       });
       const closeBtn = smallBtn('CLOSE', '关闭');
-      closeBtn.addEventListener('click', () => box.remove());
+      function closeAscii(): void {
+        box.remove();
+        document.removeEventListener('keydown', esc);
+        if (closeAsciiPanel === closeAscii) closeAsciiPanel = null;
+      }
+      closeBtn.addEventListener('click', closeAscii);
       btnGroup.append(copyBtn, closeBtn);
       bar.append(title, btnGroup);
       box.appendChild(bar);
@@ -351,7 +358,7 @@ try {
 
       // Toast helper
       function toast(msg: string): void {
-        return createToast({
+        createToast({
           text: msg,
           variant: 'accent',
           duration: 1800,
@@ -361,10 +368,10 @@ try {
       // Keyboard Esc close
       const esc = (e: KeyboardEvent): void => {
         if (e.key === 'Escape') {
-          box.remove();
-          document.removeEventListener('keydown', esc);
+          closeAscii();
         }
       };
+      closeAsciiPanel = closeAscii;
       document.addEventListener('keydown', esc);
 
       // Entry animation keyframe (if not defined)
@@ -396,6 +403,7 @@ export function restoreFeatures(level: number = 1): void {
       (window as any).initMaomao();
     } catch (_) {}
   }
+  idleReleasedLevel1 = false;
   setMemReleased(0);
   if (console && console.log) console.log('[Onedays] features restored');
 }
@@ -407,8 +415,12 @@ export function releaseMemory(level: number = 1): void {
       cleanups.pop()!();
     } catch (_) {}
   }
-  const ascii = document.getElementById('ascii-layer');
-  if (ascii) ascii.remove();
+  if (closeAsciiPanel) {
+    closeAsciiPanel();
+  } else {
+    const ascii = document.getElementById('ascii-layer');
+    if (ascii) ascii.remove();
+  }
   if ((window as any).detachMaomao)
     try {
       (window as any).detachMaomao();
@@ -425,7 +437,6 @@ export function releaseMemory(level: number = 1): void {
   const deepDelay: number = parseInt(APP_CONFIG.idleDeepReleaseDelay || '0', 10) || 0;
   const autoRestore: boolean = !!APP_CONFIG.enableIdleAutoRestore;
   let lastActive: number = Date.now();
-  let releasedLevel1 = false;
   let deepTimer: ReturnType<typeof setTimeout> | null = null;
   let checkTimer: ReturnType<typeof setTimeout> | null = null;
   const mark = (): void => {
@@ -448,11 +459,11 @@ export function releaseMemory(level: number = 1): void {
   );
   function loop(): void {
     const idle: number = Date.now() - lastActive;
-    if (!releasedLevel1 && idle > delay) {
+    if (!idleReleasedLevel1 && idle > delay) {
       if (!UPDATE_LOCK) {
         // Update process locked, don't release
         releaseMemory(1);
-        releasedLevel1 = true;
+        idleReleasedLevel1 = true;
         if (deepDelay > 0) {
           deepTimer = setTimeout(() => {
             if (
@@ -471,11 +482,6 @@ export function releaseMemory(level: number = 1): void {
     checkTimer = setTimeout(loop, Math.min(15000, delay));
   }
   loop();
-  cleanups.push(() => {
-    events.forEach((ev: string) => window.removeEventListener(ev, mark));
-    clearTimeout(checkTimer!);
-    clearTimeout(deepTimer!);
-  });
 })();
 
 // === Bridge assignments ===

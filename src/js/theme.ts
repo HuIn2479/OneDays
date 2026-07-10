@@ -1,5 +1,6 @@
 import { APP_CONFIG } from "./config";
 import { i18n } from "./i18n";
+import { readStorage, writeStorage } from "./runtime-guards";
 
 /* ------------------------------------------------------------------ */
 /*  Constants & configuration                                         */
@@ -17,14 +18,14 @@ const defaultAccentIndex: number =
   Number.parseInt(APP_CONFIG.defaultAccentIndex ?? 0, 10) || 0;
 
 let accentIdx: number =
-  Number.parseInt(localStorage.getItem(ACC_KEY) ?? String(defaultAccentIndex), 10) ||
+  Number.parseInt(readStorage(ACC_KEY, String(defaultAccentIndex)) ?? String(defaultAccentIndex), 10) ||
   0;
-let autoTimer: ReturnType<typeof setTimeout> | null = null;
+let autoTimer: number | null = null;
 
 const LONG_PRESS_DELAY = 550;
 const DOUBLE_TAP_INTERVAL = 400;
 
-let pressTimer: ReturnType<typeof setTimeout> | null = null;
+let pressTimer: number | null = null;
 let longPressTriggered = false;
 let skipNextClick = false;
 
@@ -160,11 +161,7 @@ function setAccent(i: number, opts: SetAccentOpts = {}): void {
     toggleBtn.setAttribute("data-accent", String(accentIdx));
   }
   if (opts.persist !== false) {
-    try {
-      localStorage.setItem(ACC_KEY, String(accentIdx));
-    } catch (_) {
-      /* ignore */
-    }
+    writeStorage(ACC_KEY, String(accentIdx));
   }
   refreshAccentButtons();
   if (opts.updateBtn !== false) {
@@ -233,14 +230,10 @@ setAccent(accentIdx, { updateBtn: false });
 const mqlDark: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 const sysDark = (): boolean => mqlDark.matches;
 
-let savedMode: string = localStorage.getItem(THEME_KEY) || "";
+let savedMode: string = readStorage(THEME_KEY) || "";
 if (!savedMode) {
   savedMode = "auto";
-  try {
-    localStorage.setItem(THEME_KEY, savedMode);
-  } catch (_) {
-    /* ignore */
-  }
+  writeStorage(THEME_KEY, savedMode);
 }
 
 function applyEffective(): void {
@@ -286,11 +279,7 @@ function applyThemeMode(mode: string): void {
   // 延迟应用主题变化，让遮罩先显示
   setTimeout(() => {
     savedMode = mode;
-    try {
-      localStorage.setItem(THEME_KEY, savedMode);
-    } catch (_) {
-      /* ignore */
-    }
+    writeStorage(THEME_KEY, savedMode);
     applyEffective();
     updateBtn();
     refreshThemeButtons();

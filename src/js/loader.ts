@@ -15,7 +15,7 @@ if (!cfg.enableSplash) {
 
     const resources = [
       ...document.querySelectorAll(
-        'link[rel="stylesheet"], link[rel="manifest"], script[defer]',
+        'link[rel="stylesheet"], link[rel="manifest"], script[defer], script[type="module"]',
       ),
     ].filter((el) => (el as HTMLScriptElement).src || (el as HTMLLinkElement).href);
 
@@ -40,14 +40,6 @@ if (!cfg.enableSplash) {
     updateProgress();
 
     urls.forEach((url) => {
-      if (
-        performance.getEntriesByName(url).some((entry) => entry.initiatorType)
-      ) {
-        loaded++;
-        updateProgress();
-        return;
-      }
-
       const element = resources.find((r) => ((r as HTMLScriptElement).src || (r as HTMLLinkElement).href) === url);
       if (!element) {
         loaded++;
@@ -55,25 +47,35 @@ if (!cfg.enableSplash) {
         return;
       }
 
-      const onLoad = (): void => {
-        loaded++;
-        updateProgress();
-        cleanup();
-      };
-
-      const onError = (): void => {
-        loaded++;
-        updateProgress();
-        cleanup();
-      };
-
+      let settled = false;
       const cleanup = (): void => {
-        element.removeEventListener('load', onLoad);
-        element.removeEventListener('error', onError);
+        element.removeEventListener('load', markLoaded);
+        element.removeEventListener('error', markLoaded);
       };
 
-      element.addEventListener('load', onLoad);
-      element.addEventListener('error', onError);
+      const markLoaded = (): void => {
+        if (settled) return;
+        settled = true;
+        loaded++;
+        updateProgress();
+        cleanup();
+      };
+
+      element.addEventListener('load', markLoaded);
+      element.addEventListener('error', markLoaded);
+
+      const hasResourceTiming = performance.getEntriesByName(url).some(
+        (entry) =>
+          entry.entryType === 'resource' &&
+          Boolean((entry as PerformanceResourceTiming).initiatorType),
+      );
+      const isLoadedStylesheet =
+        element instanceof HTMLLinkElement &&
+        element.relList.contains('stylesheet') &&
+        element.sheet !== null;
+      if (hasResourceTiming || isLoadedStylesheet) {
+        markLoaded();
+      }
     });
 
     const progressObserver = new MutationObserver(() => {

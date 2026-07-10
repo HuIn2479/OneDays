@@ -1,4 +1,5 @@
 import { APP_CONFIG } from './config';
+import { isOwnedCacheKey, isOwnedServiceWorkerScope } from './runtime-guards';
 
 const cfg = APP_CONFIG || {};
 
@@ -68,9 +69,14 @@ if (subtitle) {
 // Clean legacy PWA
 (function cleanLegacyPWA(): void {
   if ('serviceWorker' in navigator) {
+    const appScope = new URL('./', window.location.href).href;
     navigator.serviceWorker
       .getRegistrations()
-      .then((regs) => regs.forEach((r) => r.unregister()))
+      .then((regs) =>
+        regs
+          .filter((r) => isOwnedServiceWorkerScope(r.scope, appScope))
+          .forEach((r) => r.unregister()),
+      )
       .catch(() => {});
   }
   if ('caches' in window) {
@@ -78,7 +84,7 @@ if (subtitle) {
       .keys()
       .then((keys) =>
         keys
-          .filter((k) => k.startsWith('onedays-'))
+          .filter(isOwnedCacheKey)
           .forEach((k) => caches.delete(k)),
       )
       .catch(() => {});

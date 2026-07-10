@@ -1,6 +1,7 @@
 // navigation.ts -- ES module version of navigation.js
 import { APP_CONFIG } from "./config";
 import { i18n } from "./i18n";
+import { isAllowedExternalUrl } from "./runtime-guards";
 
 interface CardConfig {
   id: string;
@@ -58,8 +59,11 @@ function createNavCard(cardConfig: CardConfig): HTMLAnchorElement {
   // 创建主容器
   const card = document.createElement("a");
   card.className = "nav-card";
-  card.href = url || "#";
+  card.href = url && isAllowedExternalUrl(url) ? url : "#";
   card.target = target;
+  if (target === "_blank") {
+    card.rel = "noopener noreferrer";
+  }
   card.setAttribute("data-nav-id", id);
   card.setAttribute("title", `导航到${title}`);
   if (Array.isArray(tags) && tags.length) {
@@ -216,7 +220,7 @@ function showAllCardsModal(): void {
   closeButton.className = "nav-modal-close";
   closeButton.type = "button";
   closeButton.setAttribute("aria-label", "关闭");
-  closeButton.innerHTML = "✕";
+  closeButton.textContent = "✕";
 
   modalHeader.appendChild(modalTitle);
   modalHeader.appendChild(toggleButton);
@@ -243,14 +247,15 @@ function showAllCardsModal(): void {
   document.body.appendChild(modal);
 
   // 绑定事件
-  const closeModal = (): void => {
+  function closeModal(): void {
+    document.removeEventListener("keydown", handleEscape);
     modal.classList.add("closing");
     setTimeout(() => {
       if (modal.parentNode) {
         modal.parentNode.removeChild(modal);
       }
     }, 300);
-  };
+  }
 
   closeButton.addEventListener("click", closeModal);
   toggleButton.addEventListener("click", () => {
@@ -264,12 +269,11 @@ function showAllCardsModal(): void {
   });
 
   // ESC键关闭
-  const handleEscape = (e: KeyboardEvent): void => {
+  function handleEscape(e: KeyboardEvent): void {
     if (e.key === "Escape") {
       closeModal();
-      document.removeEventListener("keydown", handleEscape);
     }
-  };
+  }
   document.addEventListener("keydown", handleEscape);
 
   // 动画进入

@@ -1,5 +1,6 @@
 import { APP_CONFIG } from './config';
 import { i18n } from './i18n';
+import { appendQuery, isAllowedExternalUrl } from './runtime-guards';
 
 interface HitokotoResult {
   content: string;
@@ -55,13 +56,13 @@ if (cfg.enableHitokoto === false) {
   const adapters: Record<string, ApiAdapter> = {
     hitokoto: {
       buildUrl(apiConfig: ApiConfig): string {
-        const params = new URLSearchParams(apiConfig.params || {});
+        let url = appendQuery(apiConfig.url, apiConfig.params || {});
         if (apiConfig.categories) {
-          apiConfig.categories.forEach((cat) => params.append('c', cat));
+          apiConfig.categories.forEach((cat) => {
+            url = appendQuery(url, { c: cat });
+          });
         }
-        return (
-          apiConfig.url + (params.toString() ? '?' + params.toString() : '')
-        );
+        return url;
       },
 
       parseResponse(data: Record<string, unknown>): HitokotoResult {
@@ -81,10 +82,7 @@ if (cfg.enableHitokoto === false) {
     custom: {
       buildUrl(apiConfig: ApiConfig): string {
         if (!apiConfig.url) throw new Error('Custom API URL not configured');
-        const params = new URLSearchParams(apiConfig.params || {});
-        return (
-          apiConfig.url + (params.toString() ? '?' + params.toString() : '')
-        );
+        return appendQuery(apiConfig.url, apiConfig.params || {});
       },
 
       parseResponse(data: Record<string, unknown>): HitokotoResult {
@@ -160,13 +158,15 @@ if (cfg.enableHitokoto === false) {
 
         function setHitokoto(content: string, url: string | null = null, isError: boolean = false): void {
           link.textContent = content;
-          if (url) {
-            link.href = url;
+          const safeUrl = url && isAllowedExternalUrl(url) ? url : null;
+          if (safeUrl) {
+            link.href = safeUrl;
             link.target = '_blank';
             link.rel = 'noopener noreferrer';
           } else {
             link.removeAttribute('href');
             link.removeAttribute('target');
+            link.removeAttribute('rel');
           }
 
           if (isError) {
